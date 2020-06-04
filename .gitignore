@@ -1,0 +1,12 @@
+*.pyc
+.DS_Store
+/.idea
+/amazon.txt
+/mail_box/*.txt
+/jcb_data.xlsx
+/mail_list/*.txt
+*.xlsx
+/30.txt
+/mail_list/bingoman.jp.txt
+/jcb.txt
+/rakuten.txt
