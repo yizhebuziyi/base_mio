@@ -1,0 +1,16 @@
+pyyaml
+flask
+flask_bcrypt
+flask_login
+flask_wtf
+flask_socketio
+flask_redis
+flask_cors
+flask_script
+requests
+selenium
+pymongo
+mongoengine
+flask_mongoengine
+eventlet
+gunicorn
