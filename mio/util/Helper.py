@@ -13,6 +13,8 @@ from flask import jsonify
 def get_real_ip(request):
     if 'HTTP_CF_CONNECTING_IP' in request.environ:
         real_ip = request.environ['HTTP_CF_CONNECTING_IP']
+    elif 'HTTP_X_FORWARDED_FOR' in request.environ:
+        real_ip = request.environ['HTTP_X_FORWARDED_FOR']
     else:
         real_ip = request.environ['HTTP_X_REAL_IP'] \
             if 'HTTP_X_REAL_IP' in request.environ else request.environ['REMOTE_ADDR']
