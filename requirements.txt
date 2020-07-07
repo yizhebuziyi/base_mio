@@ -14,4 +14,4 @@ mongoengine
 flask_mongoengine
 eventlet
 gunicorn
-tornado
+tornado==5.1.1
