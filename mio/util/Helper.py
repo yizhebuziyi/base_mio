@@ -251,3 +251,10 @@ def ant_path_matcher(ant_path, expected_path):
 def check_email(email):
     str = r'^[a-zA-Z0-9_-]+(\.[a-zA-Z0-9_-]+){0,4}@[a-zA-Z0-9_-]+(\.[a-zA-Z0-9_-]+){0,4}$'
     return re.match(str, email)
+
+
+def get_args_from_dict(dt, ky, default=''):
+    word = default if ky not in dt else dt[ky]
+    if is_number(word):
+        return word
+    return str(word).strip()
