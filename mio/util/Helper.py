@@ -22,6 +22,26 @@ def get_real_ip(request):
     return real_ip
 
 
+def timestamp2str(timestamp, iso_format='%Y-%m-%d %H:%M:%S', timezone=8):
+    try:
+        x = time.localtime(timestamp + int(3600 * timezone))
+        dt = time.strftime(iso_format, x)
+        return dt
+    except Exception as e:
+        print(e)
+        return None
+
+
+def str2timestamp(date, iso_format='%Y-%m-%d %H:%M:%S'):
+    try:
+        time_array = time.strptime(date, iso_format)
+        timestamp = time.mktime(time_array)
+        return int(timestamp)
+    except Exception as e:
+        print(e)
+        return None
+
+
 def get_bool(obj):
     obj = False if obj is None else obj
     if isinstance(obj, bool) is False:
