@@ -199,18 +199,23 @@ def crc_file(file_name):
 
 
 def is_number(s):
-    try:
-        float(s)
-        return True
-    except ValueError:
-        pass
+    if s is not None:
+        try:
+            s = str(s)
+        except ValueError:
+            return False
+        try:
+            float(s)
+            return True
+        except ValueError:
+            pass
 
-    try:
-        import unicodedata
-        unicodedata.numeric(s)
-        return True
-    except (TypeError, ValueError):
-        pass
+        try:
+            import unicodedata
+            unicodedata.numeric(s)
+            return True
+        except (TypeError, ValueError):
+            pass
 
     return False
 
@@ -277,7 +282,9 @@ def get_args_from_dict(dt, ky, default=''):
     word = default if ky not in dt else dt[ky]
     if is_number(word):
         return word
-    return str(word).strip()
+    if isinstance(word, str):
+        return str(word).strip()
+    return word
 
 
 def get_variable_from_request(request, key_name, default='', method='check'):
