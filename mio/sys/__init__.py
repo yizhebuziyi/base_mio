@@ -11,7 +11,7 @@ from flask_wtf.csrf import CSRFProtect
 from flask_socketio import SocketIO
 from mio.util.Logs import LogHandler
 
-MIO_SYSTEM_VERSION = '0.8.17'
+MIO_SYSTEM_VERSION = '1.0'
 
 mail = None
 send_mail = None

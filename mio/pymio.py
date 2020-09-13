@@ -2,9 +2,9 @@
 # -*- coding: utf-8 -*-
 import os
 import sys
-from tornado.wsgi import WSGIContainer
 from tornado.httpserver import HTTPServer
 from tornado.ioloop import IOLoop
+from mio.sys.wsgi import WSGIContainerWithThread
 
 root_path = os.path.abspath(os.path.dirname(__file__) + '/../')
 sys.path.append(root_path)
@@ -42,10 +42,11 @@ for arg in sys.argv:
         MIO_CONFIG = temp[1]
         continue
 app = create_app(MIO_CONFIG, root_path, MIO_APP_CONFIG)
+mWSGI = WSGIContainerWithThread(app)
 
 if __name__ == '__main__':
     try:
-        http_server = HTTPServer(WSGIContainer(app))
+        http_server = HTTPServer(mWSGI)
         http_server.listen(MIO_PORT, MIO_HOST)
         print("WebServer listen in http://{}:{}".format(MIO_HOST, MIO_PORT))
         IOLoop.instance().start()
