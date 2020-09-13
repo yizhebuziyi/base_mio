@@ -8,10 +8,11 @@ from flask import Flask
 from flask_bcrypt import Bcrypt
 from flask_login import LoginManager
 from flask_wtf.csrf import CSRFProtect
-from flask_socketio import SocketIO
+from tornado.web import Application, FallbackHandler
+from mio.sys.wsgi import WSGIContainerWithThread
 from mio.util.Logs import LogHandler
 
-MIO_SYSTEM_VERSION = '1.0'
+MIO_SYSTEM_VERSION = '1.1.1'
 
 mail = None
 send_mail = None
@@ -23,7 +24,6 @@ rdb = None
 csrf = CSRFProtect()
 login_manager = LoginManager()
 blueprint_config = []
-socket_io = SocketIO()
 cors = None
 
 
@@ -77,7 +77,6 @@ def create_app(config_name, root_path=None, config_clz=None, log_file=None, log_
             sys.exit()
         app = Flask(__name__, static_folder=static_folder, template_folder=template_folder)
         app.config.from_object(config[config_name])
-        socket_io.init_app(app)
         config[config_name].init_app(app)
         if app.config['MIO_MAIL']:
             from flask_mail import Mail
@@ -131,7 +130,19 @@ def create_app(config_name, root_path=None, config_clz=None, log_file=None, log_
                 app.register_blueprint(bp, url_prefix=blueprint[key]['url_prefix'])
             else:
                 app.register_blueprint(bp)
-        return app
+        # ws配置
+        wss = []
+        websocket_config = config_yaml['websocket'] if 'websocket' in config_yaml else []
+        for websocket in websocket_config:
+            key = list(websocket.keys())[0]
+            clazz = __import__(websocket[key]['class'], globals(), locals(), [key])
+            ws = getattr(clazz, key)
+            if 'path' not in websocket[key]:
+                console.error('Path must be set in config.yaml.')
+                exit(0)
+            wss.append((websocket[key]['path'], ws))
+        wss.append((r'.*', FallbackHandler, dict(fallback=WSGIContainerWithThread(app))))
+        return Application(wss)
     except Exception as e:
         console.error(u'Initializing the system has error：{}'.format(str(e)))
         sys.exit()
