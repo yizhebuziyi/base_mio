@@ -55,7 +55,7 @@ class WSGIContainerWithThread(WSGIContainer):
             if 'content-type' not in header_set:
                 headers.append(('Content-Type', 'text/html; charset=UTF-8'))
         if 'server' not in header_set:
-            headers.append(('Server', 'PyMio/1.0'))
+            headers.append(('Server', 'PyMio/{}'.format(MIO_SYSTEM_VERSION)))
         start_line = httputil.ResponseStartLine('HTTP/1.1', status_code, reason)
         header_obj = httputil.HTTPHeaders()
         for key, value in headers:
