@@ -5,12 +5,12 @@ import sys
 
 root_path = os.path.abspath(os.path.dirname(__file__) + '/../')
 sys.path.append(root_path)
-from mio.pymio import mWSGI
+from mio.pymio import app
 from flask_script import Manager
 
 from mio.ext.cli import CliCommand
 
-manager = Manager(mWSGI)
+manager = Manager(app)
 manager.add_command('cli', CliCommand)
 
 if __name__ == '__main__':

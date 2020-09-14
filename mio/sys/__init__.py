@@ -8,8 +8,6 @@ from flask import Flask
 from flask_bcrypt import Bcrypt
 from flask_login import LoginManager
 from flask_wtf.csrf import CSRFProtect
-from tornado.web import Application, FallbackHandler
-from mio.sys.wsgi import WSGIContainerWithThread
 from mio.util.Logs import LogHandler
 from mio.sys.wsgi import MIO_SYSTEM_VERSION
 
@@ -140,8 +138,7 @@ def create_app(config_name, root_path=None, config_clz=None, log_file=None, log_
                 console.error('Path must be set in config.yaml.')
                 exit(0)
             wss.append((websocket[key]['path'], ws))
-        wss.append((r'.*', FallbackHandler, dict(fallback=WSGIContainerWithThread(app))))
-        return Application(wss)
+        return app, wss
     except Exception as e:
         console.error(u'Initializing the system has error：{}'.format(str(e)))
         sys.exit()

@@ -3,6 +3,8 @@
 import os
 import sys
 from tornado.ioloop import IOLoop
+from tornado.web import Application, FallbackHandler
+from mio.sys.wsgi import WSGIContainerWithThread
 
 root_path = os.path.abspath(os.path.dirname(__file__) + '/../')
 sys.path.append(root_path)
@@ -39,7 +41,9 @@ for arg in sys.argv:
     if temp[0].lower() == 'config':
         MIO_CONFIG = temp[1]
         continue
-mWSGI = create_app(MIO_CONFIG, root_path, MIO_APP_CONFIG)
+app, wss = create_app(MIO_CONFIG, root_path, MIO_APP_CONFIG)
+wss.append((r'.*', FallbackHandler, dict(fallback=WSGIContainerWithThread(app))))
+mWSGI = Application(wss)
 
 if __name__ == '__main__':
     try:
