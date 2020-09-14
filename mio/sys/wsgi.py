@@ -6,7 +6,8 @@ from tornado.wsgi import WSGIContainer
 from tornado.ioloop import IOLoop
 from typing import List, Tuple, Optional, Callable, Any, Type
 from types import TracebackType
-from mio.sys import MIO_SYSTEM_VERSION
+
+MIO_SYSTEM_VERSION = '1.1.1'
 
 
 class WSGIContainerWithThread(WSGIContainer):
@@ -54,7 +55,7 @@ class WSGIContainerWithThread(WSGIContainer):
             if 'content-type' not in header_set:
                 headers.append(('Content-Type', 'text/html; charset=UTF-8'))
         if 'server' not in header_set:
-            headers.append(('Server', 'PyMio/{}'.format(MIO_SYSTEM_VERSION)))
+            headers.append(('Server', 'PyMio/1.0'))
         start_line = httputil.ResponseStartLine('HTTP/1.1', status_code, reason)
         header_obj = httputil.HTTPHeaders()
         for key, value in headers:

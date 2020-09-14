@@ -11,8 +11,7 @@ from flask_wtf.csrf import CSRFProtect
 from tornado.web import Application, FallbackHandler
 from mio.sys.wsgi import WSGIContainerWithThread
 from mio.util.Logs import LogHandler
-
-MIO_SYSTEM_VERSION = '1.1.1'
+from mio.sys.wsgi import MIO_SYSTEM_VERSION
 
 mail = None
 send_mail = None
