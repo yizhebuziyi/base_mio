@@ -4,11 +4,11 @@ import os
 import sys
 from tornado.ioloop import IOLoop
 from tornado.web import Application, FallbackHandler
-from mio.sys.wsgi import WSGIContainerWithThread
 
 root_path = os.path.abspath(os.path.dirname(__file__) + '/../')
 sys.path.append(root_path)
 from mio.sys import create_app
+from mio.sys.wsgi import WSGIContainerWithThread
 from config import MIO_HOST, MIO_PORT
 
 index = -1
