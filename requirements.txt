@@ -15,3 +15,5 @@ flask_mongoengine
 eventlet
 gunicorn
 tornado
+daiquiri
+fleming
