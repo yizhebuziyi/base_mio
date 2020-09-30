@@ -12,8 +12,11 @@ from mio.sys import create_app
 from mio.sys.wsgi import WSGIContainerWithThread
 from config import MIO_HOST, MIO_PORT
 
-os.environ['TZ'] = os.environ.get('MIO_TIMEZONE') or 'Asia/Shanghai'
-time.tzset()
+try:
+    os.environ['TZ'] = os.environ.get('MIO_TIMEZONE') or 'Asia/Shanghai'
+    time.tzset()
+except:
+    pass
 
 index = -1
 MIO_CONFIG = os.environ.get('MIO_CONFIG') or 'default'
