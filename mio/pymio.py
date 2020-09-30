@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 import os
 import sys
+import time
 from tornado.ioloop import IOLoop
 from tornado.web import Application, FallbackHandler
 
@@ -10,6 +11,9 @@ sys.path.append(root_path)
 from mio.sys import create_app
 from mio.sys.wsgi import WSGIContainerWithThread
 from config import MIO_HOST, MIO_PORT
+
+os.environ['TZ'] = os.environ.get('MIO_TIMEZONE') or 'Asia/Shanghai'
+time.tzset()
 
 index = -1
 MIO_CONFIG = os.environ.get('MIO_CONFIG') or 'default'

@@ -1,12 +1,11 @@
 # -*- coding: utf-8 -*-
 import os
-import sys
 import re
 import zlib
 import random
 import string
 import time
-
+from datetime import datetime
 from flask import jsonify
 
 
@@ -22,10 +21,18 @@ def get_real_ip(request):
     return real_ip
 
 
-def timestamp2str(timestamp, iso_format='%Y-%m-%d %H:%M:%S', timezone=8):
+def timestamp2str(timestamp, iso_format='%Y-%m-%d %H:%M:%S', timezone=8, local_tz=None, utc_format="%Y-%m-%d %H:%M:%S",
+                  is_dst=None):
     try:
-        x = time.localtime(timestamp + int(3600 * timezone))
-        dt = time.strftime(iso_format, x)
+        if local_tz:
+            x = time.localtime(timestamp)
+            utc_time_str = time.strftime(utc_format, x)
+            utc_dt = datetime.strptime(utc_time_str, utc_format)
+            local_dt = local_tz.localize(utc_dt, is_dst=is_dst)
+            dt = local_dt.strftime(iso_format)
+        else:
+            x = time.localtime(timestamp + int(3600 * timezone))
+            dt = time.strftime(iso_format, x)
         return dt
     except Exception as e:
         print(e)
