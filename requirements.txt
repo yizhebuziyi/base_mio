@@ -17,3 +17,4 @@ gunicorn
 tornado
 daiquiri
 fleming
+flask_babel

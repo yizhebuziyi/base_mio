@@ -7,6 +7,7 @@ import logging
 from flask import Flask
 from flask_bcrypt import Bcrypt
 from flask_login import LoginManager
+from flask_babel import Babel
 from flask_wtf.csrf import CSRFProtect
 from mio.util.Logs import LogHandler
 from mio.sys.wsgi import MIO_SYSTEM_VERSION
@@ -75,6 +76,7 @@ def create_app(config_name, root_path=None, config_clz=None, log_file=None, log_
         app = Flask(__name__, static_folder=static_folder, template_folder=template_folder)
         app.config.from_object(config[config_name])
         config[config_name].init_app(app)
+        babel = Babel(app)
         if app.config['MIO_MAIL']:
             from flask_mail import Mail
             global mail
