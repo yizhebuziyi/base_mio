@@ -74,17 +74,17 @@ def file_lock(filename, txt=' ', exp=None, reader=False):
         return -1 if not is_ok else 1, txt
     # 如果文件存在，则判断是否需要检测过期
     if exp is None or not is_number(exp):
-        return 0, u'已锁定' if not reader else read_txt_file(lock)
+        return 0, u'Locked.' if not reader else read_txt_file(lock)
     exp = int(exp)
     if exp <= 0:
-        return 0, u'已锁定' if not reader else read_txt_file(lock)
+        return 0, u'Locked.' if not reader else read_txt_file(lock)
     exp = int(exp * 60)  # 是否有超过界限的问题？
     file_time = int(os.stat(lock).st_mtime)
     if exp >= (int(time.time()) - file_time):
         os.unlink(lock)
         return file_lock(filename, txt, exp)
     # 判断是否要读取内容
-    return 0, u'已锁定' if not reader else read_txt_file(lock)
+    return 0, u'Locked.' if not reader else read_txt_file(lock)
 
 
 def write_txt_file(filename, txt=' ', encoding='utf-8'):
@@ -126,12 +126,12 @@ def read_file(filename, method='r', encoding='utf-8'):
 def file_unlock(filename):
     lock = os.path.join(get_root_path(), 'lock')
     if not os.path.exists(lock):
-        return 1, u'未锁定'
+        return 1, u'Unlocked.'
     try:
         lock = os.path.join(lock, filename)
         if os.path.isfile(lock):
             os.unlink(lock)
-        return 1, u'已解锁'
+        return 1, u'Locked.'
     except Exception as e:
         return -1, str(e)
 

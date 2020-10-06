@@ -9,7 +9,7 @@ class LogHandler(object):
 
     def __init__(self, logger_name, fmt=None, log_file=None, log_level=logging.DEBUG):
         if logger_name is None or not isinstance(logger_name, str):
-            print(u'发生严重异常，传入的logger_name不为str类型')
+            print(u'logger_name must be str.')
             exit()
         fmt = '%(asctime)s - %(name)s - %(message)s' if fmt is None else fmt.strip()
         formatter = logging.Formatter(fmt)  # 实例化formatter
@@ -24,7 +24,7 @@ class LogHandler(object):
                     try:
                         os.makedirs(path)
                     except Exception as e:
-                        print(u'创建日志文件夹时发生严重异常：')
+                        print(u'Can\'t create folder：')
                         print(e)
                         exit()
             file_handler = logging.handlers.RotatingFileHandler(log_file, maxBytes=1024 * 1024,

@@ -2,16 +2,17 @@
 from flask import current_app
 from flask_script import Manager
 
-CliCommand = Manager(usage=u'执行命令行操作')
+CliCommand = Manager(usage=u'Execute Command line.')
 
 
 @CliCommand.option('-cls', '--clazz', dest='clazz', default=None,
-                   help="设置运行的class，例：cli.Hello.World.me，文件放在cli")
+                   help=u'Class name. like: cli.Hello.World.me, file in cli folder and name is Hello.py.')
 @CliCommand.option('-arg', '--args', dest='args', default=None,
-                   help="要传入的参数，一般是k=v的形式传入，连词符为||，为了避免出问题，最好加\"\"传入")
+                   help=u'Arguments. using k=v. If you have multiple parameters, you need to use "||".'
+                        u' like: "k1=v1||k2=v2..."')
 def exe(clazz=None, args=None):
     if clazz is None:
-        print('请指定要执行的类名，例：-cls=cli.Hello.World.me')
+        print(u'Execute cli function, like: shell.py cli exe -cls=cli.Hello.World.me')
         return
     tmp = clazz.split('.')
     file = '.'.join(tmp[0:-2])
