@@ -6,6 +6,7 @@ flask_login
 flask_babel
 flask_wtf
 flask_mongoengine
+flask_redis
 flask_cors
 flask_script
 gunicorn
