@@ -7,7 +7,7 @@ from tornado.ioloop import IOLoop
 from typing import List, Tuple, Optional, Callable, Any, Type
 from types import TracebackType
 
-MIO_SYSTEM_VERSION = '1.2.5'
+MIO_SYSTEM_VERSION = '1.2.6'
 
 
 class WSGIContainerWithThread(WSGIContainer):
@@ -31,6 +31,7 @@ class WSGIContainerWithThread(WSGIContainer):
             data['headers'] = headers
             return response.append
 
+        IOLoop.configure('tornado.platform.asyncio.AsyncIOLoop')
         loop = IOLoop.instance()
 
         app_response = yield loop.run_in_executor(None, self.wsgi_application, WSGIContainer.environ(request),
