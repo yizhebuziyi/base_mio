@@ -293,11 +293,15 @@ def get_variable_from_request(request, key_name, default='', method='check'):
         word = request.form.get(key_name, None)
         if word is None:
             word = request.args.get(key_name, None)
+            if key_name in request.headers:
+                word = request.headers[key_name]
         word = default if word is None else word
     elif method == 'post':
         word = request.form.get(key_name, default)
     elif method == 'get':
         word = request.args.get(key_name, default)
+    elif method == 'header':
+        word = request.headers[key_name] if key_name in request.headers else default
     else:
         return default
     if word is None:
