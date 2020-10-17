@@ -1,7 +1,15 @@
 # -*- coding: utf-8 -*-
+import os
 import sys
-from flask import render_template
+from flask import send_from_directory, render_template
+from mio.util.Helper import get_root_path
 from . import main
+
+
+@main.route('/favicon.ico')
+def favicon():
+    return send_from_directory(os.path.join(get_root_path(), 'web', 'static'),
+                               'favicon.ico', mimetype='image/vnd.microsoft.icon')
 
 
 @main.route('/')
