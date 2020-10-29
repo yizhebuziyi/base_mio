@@ -1,3 +1,5 @@
 export MIO_CONFIG="production"
 export MIO_PORT=8000
-/opt/.pyenv/versions/3.6.9/bin/python mio/pymio.pyc
+cd $(dirname $0)
+work_path=$(pwd)
+nohup /opt/.pyenv/versions/3.9.0/bin/python ${work_path}/mio/pymio.pyc > www.log 2>&1 &
