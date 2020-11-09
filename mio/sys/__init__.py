@@ -18,7 +18,7 @@ db = None
 crypt = Bcrypt()
 ssdb = None
 redis_db = None
-rdb = None
+rmdb = None
 csrf = CSRFProtect()
 login_manager = LoginManager()
 blueprint_config = []
@@ -102,11 +102,11 @@ def create_app(config_name, root_path=None, config_clz=None, log_file=None, log_
         if app.config['CORS_ENABLE']:
             from flask_cors import CORS
             cors = CORS(app, resources=app.config['CORS_URI'])
-        if app.config['RDB_SYS_ENABLE']:
+        if app.config['RMDB_SYS_ENABLE']:
             from flask_sqlalchemy import SQLAlchemy
-            global rdb
-            rdb = SQLAlchemy()
-            rdb.init_app(app)
+            global rmdb
+            rmdb = SQLAlchemy()
+            rmdb.init_app(app)
         if 'SSDB_ENABLE' in app.config and app.config['SSDB_ENABLE']:
             if 'SSDB_SETTINGS' in app.config:
                 ssdb_setting = app.config['SSDB_SETTINGS']

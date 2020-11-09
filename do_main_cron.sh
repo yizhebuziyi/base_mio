@@ -1,6 +1,6 @@
 #!/bin/bash
 PYENV_ROOT="/opt/.pyenv"
-PYTHON_ROOT="$PYENV_ROOT/versions/3.6.9/bin"
+PYTHON_ROOT="$PYENV_ROOT/versions/3.9.0/bin"
 EXECUTION="cli.WorkMan.Daemon.do_main_cron"
 export PYTHONIOENCODING=utf-8
 export MIO_CONFIG="production"

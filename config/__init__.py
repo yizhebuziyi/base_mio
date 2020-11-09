@@ -29,7 +29,7 @@ class Config:
     # 是否使用ssdb
     SSDB_ENABLE = os.environ.get('MIO_SSDB_ENABLE', False)
     # 是否使用关系型数据库 支持sqlite, mysql, pgsql
-    RDB_SYS_ENABLE = os.environ.get('MIO_RDB_SYS_ENABLE', False)
+    RMDB_SYS_ENABLE = os.environ.get('MIO_RMDB_SYS_ENABLE', False)
     # 是否使用CORS
     CORS_ENABLE = os.environ.get('MIO_CORS_ENABLE', True)
     CORS_URI = os.environ.get('MIO_CORS_URI', {r"/api/*": {"origins": "*"}})
