@@ -31,8 +31,8 @@ class Config:
     # 是否使用关系型数据库 支持sqlite, mysql, pgsql
     RMDB_SYS_ENABLE = os.environ.get('MIO_RMDB_SYS_ENABLE', False)
     # 是否使用CORS
-    CORS_ENABLE = os.environ.get('MIO_CORS_ENABLE', True)
-    CORS_URI = os.environ.get('MIO_CORS_URI', {r"/api/*": {"origins": "*"}})
+    CORS_ENABLE = os.environ.get('MIO_CORS_ENABLE', False)
+    CORS_URI = os.environ.get('MIO_CORS_URI', {r"/*": {"origins": "*"}})
     # 定时任务相关
     CRON_ENABLE = os.environ.get('MIO_CRON_ENABLE', False)
     # at: 分 时 日 月 周

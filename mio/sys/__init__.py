@@ -22,7 +22,6 @@ rmdb = None
 csrf = CSRFProtect()
 login_manager = LoginManager()
 blueprint_config = []
-cors = None
 
 
 def create_app(config_name, root_path=None, config_clz=None, log_file=None, log_level=logging.DEBUG):
@@ -101,7 +100,7 @@ def create_app(config_name, root_path=None, config_clz=None, log_file=None, log_
             redis_db.init_app(app)
         if app.config['CORS_ENABLE']:
             from flask_cors import CORS
-            cors = CORS(app, resources=app.config['CORS_URI'])
+            CORS(app, resources=app.config['CORS_URI'])
         if app.config['RMDB_SYS_ENABLE']:
             from flask_sqlalchemy import SQLAlchemy
             global rmdb
