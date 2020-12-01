@@ -22,8 +22,6 @@ class Config:
     MAIL_PASSWORD = os.environ.get('MIO_MAIL_PASSWORD', '')
     # 是否使用MONGODB
     MONGODB_ENABLE = os.environ.get('MIO_MONGODB_ENABLE', False)
-    # 是否使用RabbitMQ
-    RABBITMQ_ENABLE = os.environ.get('MIO_RABBITMQ_ENABLE', False)
     # 是否使用Redis
     REDIS_ENABLE = os.environ.get('MIO_REDIS_ENABLE', False)
     # 是否使用ssdb
@@ -33,17 +31,6 @@ class Config:
     # 是否使用CORS
     CORS_ENABLE = os.environ.get('MIO_CORS_ENABLE', False)
     CORS_URI = os.environ.get('MIO_CORS_URI', {r"/*": {"origins": "*"}})
-    # 定时任务相关
-    CRON_ENABLE = os.environ.get('MIO_CRON_ENABLE', False)
-    # at: 分 时 日 月 周
-    CRON_SETTING = [
-        {
-            'name': 'RabbitMQ Sender',
-            'file': 'cron.Mq',
-            'class': 'Sender',
-            'at': '* * * * *'
-        }
-    ]
 
     @staticmethod
     def init_app(app):
