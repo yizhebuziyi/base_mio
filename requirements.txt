@@ -12,3 +12,4 @@ flask_script
 gunicorn
 daiquiri
 fleming
+numba
