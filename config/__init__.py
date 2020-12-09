@@ -22,8 +22,6 @@ class Config:
     MAIL_PASSWORD = os.environ.get('MIO_MAIL_PASSWORD', '')
     # 是否使用MONGODB
     MONGODB_ENABLE = os.environ.get('MIO_MONGODB_ENABLE', False)
-    # 是否使用RabbitMQ
-    RABBITMQ_ENABLE = os.environ.get('MIO_RABBITMQ_ENABLE', False)
     # 是否使用Redis
     REDIS_ENABLE = os.environ.get('MIO_REDIS_ENABLE', False)
     # 是否使用ssdb
