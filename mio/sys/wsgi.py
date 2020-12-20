@@ -17,7 +17,7 @@ class WSGIContainerWithThread(WSGIContainer):
         data = {}
         response = []
 
-        @jit(forceobj=True)
+        @jit(nogil=True, forceobj=True)
         def start_response(
                 status: str,
                 headers: List[Tuple[str, str]],
