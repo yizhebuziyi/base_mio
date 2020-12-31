@@ -14,7 +14,7 @@ class Config:
     MIO_MAIL = False
     MIO_SEND_MAIL = False
     MAIL_SUBJECT_PREFIX = os.environ.get('MIO_MAIL_SUBJECT_PREFIX', '[Mio System]')  # 默认邮件标题前缀
-    MAIL_SENDER = os.environ.get('MIO_MAIL_SERVER', 'Mio System Administrator <admin@example.com>')  # 默认发件人
+    MAIL_SENDER = os.environ.get('MIO_MAIL_DEFAULT_SENDER', 'Mio System Administrator <admin@example.com>')  # 默认发件人
     MAIL_SERVER = os.environ.get('MIO_MAIL_SERVER', 'localhost')
     MAIL_PORT = os.environ.get('MIO_MAIL_PORT', 25)
     MAIL_USE_TLS = os.environ.get('MIO_MAIL_USE_TLS', False)
