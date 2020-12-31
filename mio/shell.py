@@ -12,12 +12,6 @@ from mio.ext.cli import CliCommand
 
 manager = Manager(app)
 manager.add_command('cli', CliCommand)
-if app.config['RMDB_SYS_ENABLE']:
-    from mio.sys import rmdb
-    from flask_migrate import Migrate, MigrateCommand
-
-    migrate = Migrate(app=app, db=rmdb)
-    manager.add_command('db', MigrateCommand)
 
 if __name__ == '__main__':
     manager.run()

@@ -5,11 +5,18 @@ import zlib
 import random
 import string
 import time
-from datetime import datetime, timezone, timedelta
+from datetime import datetime, timedelta
 from flask import jsonify
 
 
-def get_real_ip(request):
+def in_dict(dic: dict, key: str) -> bool:
+    for kt in dic.keys():
+        if kt == key:
+            return True
+    return False
+
+
+def get_real_ip(request) -> str:
     if 'HTTP_CF_CONNECTING_IP' in request.environ:
         real_ip = request.environ['HTTP_CF_CONNECTING_IP']
     elif 'HTTP_X_REAL_IP' in request.environ:
@@ -21,7 +28,7 @@ def get_real_ip(request):
     return real_ip
 
 
-def timestamp2str(timestamp, iso_format='%Y-%m-%d %H:%M:%S', tz=8):
+def timestamp2str(timestamp: int, iso_format: str = '%Y-%m-%d %H:%M:%S', tz: int = 8):
     try:
         utc_time = datetime.fromtimestamp(timestamp)
         local_dt = utc_time + timedelta(hours=tz)
@@ -32,7 +39,7 @@ def timestamp2str(timestamp, iso_format='%Y-%m-%d %H:%M:%S', tz=8):
         return None
 
 
-def str2timestamp(date, iso_format='%Y-%m-%d %H:%M:%S'):
+def str2timestamp(date: str, iso_format: str = '%Y-%m-%d %H:%M:%S'):
     try:
         time_array = time.strptime(date, iso_format)
         timestamp = time.mktime(time_array)
@@ -42,7 +49,7 @@ def str2timestamp(date, iso_format='%Y-%m-%d %H:%M:%S'):
         return None
 
 
-def get_bool(obj):
+def get_bool(obj) -> bool:
     obj = False if obj is None else obj
     if isinstance(obj, bool) is False:
         if is_number(obj):
@@ -54,17 +61,17 @@ def get_bool(obj):
     return obj
 
 
-def get_int(obj):
+def get_int(obj) -> int:
     obj = 0 if is_number(obj) is False else int(obj)
     return obj
 
 
-def get_root_path():
+def get_root_path() -> str:
     root_path = os.path.abspath(os.path.dirname(__file__) + '/../../')
     return root_path
 
 
-def file_lock(filename, txt=' ', exp=None, reader=False):
+def file_lock(filename: str, txt: str = ' ', exp: int = None, reader: bool = False) -> (bool, str):
     lock = os.path.join(get_root_path(), 'lock')
     if not os.path.exists(lock):
         os.makedirs(lock)

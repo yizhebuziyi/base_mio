@@ -8,7 +8,7 @@ from typing import List, Tuple, Optional, Callable, Any, Type
 from types import TracebackType
 from numba import jit
 
-MIO_SYSTEM_VERSION = '1.2.8'
+MIO_SYSTEM_VERSION = '1.2.9'
 
 
 class WSGIContainerWithThread(WSGIContainer):
@@ -46,7 +46,6 @@ class WSGIContainerWithThread(WSGIContainer):
                 app_response.close()
         if not data:
             raise Exception('WSGI app did not call start_response')
-            pass
         status_code_str, reason = str(data['status']).split(' ', 1)
         status_code = int(status_code_str)
         headers = data['headers']
