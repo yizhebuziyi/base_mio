@@ -28,25 +28,26 @@ def get_real_ip(request) -> str:
     return real_ip
 
 
-def timestamp2str(timestamp: int, iso_format: str = '%Y-%m-%d %H:%M:%S', tz: int = 8):
+def timestamp2str(timestamp: int, iso_format: str = '%Y-%m-%d %H:%M:%S', tz: int = 8) -> str:
+    dt = None
     try:
         utc_time = datetime.fromtimestamp(timestamp)
         local_dt = utc_time + timedelta(hours=tz)
         dt = local_dt.strftime(iso_format)
-        return dt
     except Exception as e:
         print(e)
-        return None
+    return dt
 
 
-def str2timestamp(date: str, iso_format: str = '%Y-%m-%d %H:%M:%S'):
+def str2timestamp(date: str, iso_format: str = '%Y-%m-%d %H:%M:%S') -> int:
+    ts = None
     try:
         time_array = time.strptime(date, iso_format)
         timestamp = time.mktime(time_array)
-        return int(timestamp)
+        ts = int(timestamp)
     except Exception as e:
         print(e)
-        return None
+    return ts
 
 
 def get_bool(obj) -> bool:
@@ -94,7 +95,7 @@ def file_lock(filename: str, txt: str = ' ', exp: int = None, reader: bool = Fal
     return 0, u'Locked.' if not reader else read_txt_file(lock)
 
 
-def write_txt_file(filename, txt=' ', encoding='utf-8'):
+def write_txt_file(filename: str, txt: str = ' ', encoding: str = 'utf-8') -> (bool, str):
     if os.path.isfile(filename):
         os.unlink(filename)
     try:
@@ -105,7 +106,7 @@ def write_txt_file(filename, txt=' ', encoding='utf-8'):
         return False, str(e)
 
 
-def read_txt_file(filename, encoding='utf-8'):
+def read_txt_file(filename: str, encoding: str = 'utf-8') -> str:
     if not os.path.isfile(filename):
         return ''
     with open(filename, 'r', encoding=encoding) as reader:
@@ -205,7 +206,7 @@ def crc_file(file_name):
     return "%X" % (prev & 0xFFFFFFFF)
 
 
-def is_number(s):
+def is_number(s) -> bool:
     if s is not None:
         try:
             s = str(s)
@@ -227,18 +228,7 @@ def is_number(s):
     return False
 
 
-def re_json(code=200, msg='ok', data=[]):
-    dic = dict(code=code, msg=msg, data=data)
-    return jsonify(dic)
-
-
-def re_dt_json(iTotalRecords=0, iTotalDisplayRecords=0, sEcho=1, aaData=[]):
-    dic = dict(iTotalRecords=iTotalRecords, iTotalDisplayRecords=iTotalDisplayRecords,
-               sEcho=sEcho, aaData=aaData)
-    return jsonify(dic)
-
-
-def self_html_code(string_html='', is_all=True):
+def self_html_code(string_html: str = '', is_all: bool = True) -> str:
     # 如果is_all为True，则过滤掉全部的<>
     if string_html is None:
         return ''
@@ -280,9 +270,9 @@ def ant_path_matcher(ant_path, expected_path):
     return True
 
 
-def check_email(email):
-    str = r'^[a-zA-Z0-9_-]+(\.[a-zA-Z0-9_-]+){0,4}@[a-zA-Z0-9_-]+(\.[a-zA-Z0-9_-]+){0,4}$'
-    return re.match(str, email)
+def check_email(email: str):
+    re_str = r'^[a-zA-Z0-9_-]+(\.[a-zA-Z0-9_-]+){0,4}@[a-zA-Z0-9_-]+(\.[a-zA-Z0-9_-]+){0,4}$'
+    return re.match(re_str, email)
 
 
 def get_args_from_dict(dt, ky, default=''):
