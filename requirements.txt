@@ -9,6 +9,9 @@ flask_mongoengine
 flask_redis
 flask_cors
 flask_script
+flask_redis
+flask_mail
 gunicorn
 daiquiri
 fleming
+numba
