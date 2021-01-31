@@ -16,7 +16,7 @@ from flask_mail import Mail
 from mio.util.Helper import in_dict
 from mio.util.Logs import LogHandler
 from mio.sys.wsgi import MIO_SYSTEM_VERSION
-from numba import jit
+# from numba import jit
 
 mail = Mail()
 crypt = Bcrypt()
@@ -36,7 +36,7 @@ def is_enable(dic: dict, key: str) -> bool:
     return _
 
 
-@jit(nogil=True, forceobj=True)
+# @jit(nogil=True, forceobj=True)
 def create_app(config_name: str, root_path: str = None, config_clz: str = None, log_file: str = None,
                log_level: int = logging.DEBUG) -> (Flask, list):
     console = LogHandler('InitApp', log_file=log_file, log_level=log_level)

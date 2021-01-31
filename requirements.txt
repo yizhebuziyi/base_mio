@@ -14,4 +14,3 @@ flask_mail
 gunicorn
 daiquiri
 fleming
-numba
