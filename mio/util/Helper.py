@@ -5,8 +5,11 @@ import zlib
 import random
 import string
 import time
+# from numba import jit
+from flask import request
 from datetime import datetime, timedelta
-from flask import jsonify
+from typing import Any, Tuple, Union, Optional, List, Dict
+from daiquiri import KeywordArgumentAdapter
 
 
 def in_dict(dic: dict, key: str) -> bool:
@@ -16,7 +19,16 @@ def in_dict(dic: dict, key: str) -> bool:
     return False
 
 
-def get_real_ip(request) -> str:
+def is_enable(dic: dict, key: str) -> bool:
+    if not in_dict(dic, key):
+        return False
+    _ = dic[key]
+    if not isinstance(_, bool):
+        return False
+    return _
+
+
+def get_real_ip() -> str:
     if 'HTTP_CF_CONNECTING_IP' in request.environ:
         real_ip = request.environ['HTTP_CF_CONNECTING_IP']
     elif 'HTTP_X_REAL_IP' in request.environ:
@@ -28,25 +40,29 @@ def get_real_ip(request) -> str:
     return real_ip
 
 
-def timestamp2str(timestamp: int, iso_format: str = '%Y-%m-%d %H:%M:%S', tz: int = 8) -> str:
+def timestamp2str(timestamp: int, iso_format: str = '%Y-%m-%d %H:%M:%S', tz: int = 8,
+                  logger: Optional[KeywordArgumentAdapter] = None) -> str:
     dt = None
     try:
         utc_time = datetime.fromtimestamp(timestamp)
         local_dt = utc_time + timedelta(hours=tz)
         dt = local_dt.strftime(iso_format)
     except Exception as e:
-        print(e)
+        if logger:
+            logger.error(e)
     return dt
 
 
-def str2timestamp(date: str, iso_format: str = '%Y-%m-%d %H:%M:%S') -> int:
+def str2timestamp(date: str, iso_format: str = '%Y-%m-%d %H:%M:%S',
+                  logger: Optional[KeywordArgumentAdapter] = None) -> int:
     ts = None
     try:
         time_array = time.strptime(date, iso_format)
         timestamp = time.mktime(time_array)
         ts = int(timestamp)
     except Exception as e:
-        print(e)
+        if logger:
+            logger.error(e)
     return ts
 
 
@@ -62,7 +78,7 @@ def get_bool(obj) -> bool:
     return obj
 
 
-def get_int(obj) -> int:
+def get_int(obj: Any) -> int:
     obj = 0 if is_number(obj) is False else int(obj)
     return obj
 
@@ -72,7 +88,7 @@ def get_root_path() -> str:
     return root_path
 
 
-def file_lock(filename: str, txt: str = ' ', exp: int = None, reader: bool = False) -> (bool, str):
+def file_lock(filename: str, txt: str = ' ', exp: int = None, reader: bool = False) -> Tuple[int, str]:
     lock = os.path.join(get_root_path(), 'lock')
     if not os.path.exists(lock):
         os.makedirs(lock)
@@ -95,7 +111,7 @@ def file_lock(filename: str, txt: str = ' ', exp: int = None, reader: bool = Fal
     return 0, u'Locked.' if not reader else read_txt_file(lock)
 
 
-def write_txt_file(filename: str, txt: str = ' ', encoding: str = 'utf-8') -> (bool, str):
+def write_txt_file(filename: str, txt: str = ' ', encoding: str = 'utf-8') -> Tuple[bool, str]:
     if os.path.isfile(filename):
         os.unlink(filename)
     try:
@@ -114,7 +130,8 @@ def read_txt_file(filename: str, encoding: str = 'utf-8') -> str:
     return txt
 
 
-def write_file(filename, txt=' ', method='w+', encoding='utf-8'):
+def write_file(filename: str, txt: Union[str, bytes] = ' ', method: str = 'w+', encoding: str = 'utf-8') \
+        -> Tuple[bool, str]:
     try:
         with open(filename, method, encoding=encoding) as locker:
             locker.write(txt)
@@ -123,16 +140,16 @@ def write_file(filename, txt=' ', method='w+', encoding='utf-8'):
         return False, str(e)
 
 
-def read_file(filename, method='r', encoding='utf-8'):
+def read_file(filename: str, method: str = 'r', encoding: str = 'utf-8') -> Optional[Union[str, bytes]]:
     if not os.path.isfile(filename):
-        return ''
+        return None
     with open(filename, method, encoding=encoding) as reader:
         txt = reader.read()
     return txt
 
 
-def file_unlock(filename):
-    lock = os.path.join(get_root_path(), 'lock')
+def file_unlock(filename: str) -> Tuple[int, str]:
+    lock: str = os.path.join(get_root_path(), 'lock')
     if not os.path.exists(lock):
         return 1, u'Unlocked.'
     try:
@@ -144,19 +161,19 @@ def file_unlock(filename):
         return -1, str(e)
 
 
-def random_str(random_length=8):
-    a = list(string.ascii_letters)
+def random_str(random_length: int = 8) -> str:
+    a: List[str] = list(string.ascii_letters)
     random.shuffle(a)
     return ''.join(a[:random_length])
 
 
-def random_number_str(random_length=8):
-    a = [str(0), str(1), str(2), str(3), str(4), str(5), str(6), str(7), str(8), str(9)]
+def random_number_str(random_length: int = 8) -> str:
+    a: List[str] = [str(0), str(1), str(2), str(3), str(4), str(5), str(6), str(7), str(8), str(9)]
     random.shuffle(a)
     return ''.join(a[:random_length])
 
 
-def random_char(size=6, special=False):
+def random_char(size: int = 6, special: bool = False) -> str:
     import random
     import string
     chars = string.ascii_letters + string.digits
@@ -165,13 +182,14 @@ def random_char(size=6, special=False):
     return ''.join(random.choice(chars) for _ in range(size))
 
 
-def get_file_list(root_path=None, files=None, is_sub=False, is_full_path=True):
+def get_file_list(root_path: Optional[str] = None, files: Optional[List[str]] = None, is_sub: bool = False,
+                  is_full_path: bool = True, include_hide_file: bool = False) -> List[str]:
     if root_path is None or files is None or not isinstance(files, list):
         return files if isinstance(files, list) else []
     for lists in os.listdir(root_path):
-        # TODO 这里要修复成允许__init__.py一类的文件可以被读取的情况
         if lists.startswith('.') or lists.endswith('.pyc'):
-            continue
+            if not include_hide_file:
+                continue
         if is_full_path:
             path = os.path.join(root_path, lists)
         else:
@@ -184,9 +202,7 @@ def get_file_list(root_path=None, files=None, is_sub=False, is_full_path=True):
     return files
 
 
-def check_file_in_list(file=None, file_list=None):
-    # 原理很简单，一个列表一个文件
-    # 先检查是否直接匹配
+def check_file_in_list(file: Optional[str] = None, file_list: List[str] = None) -> bool:
     if file is None or not isinstance(file, str) or \
             file_list is None or not isinstance(file_list, list):
         return False
@@ -199,14 +215,14 @@ def check_file_in_list(file=None, file_list=None):
     return False
 
 
-def crc_file(file_name):
+def crc_file(file_name: str) -> str:
     prev = 0
     for eachLine in open(file_name, "rb"):
         prev = zlib.crc32(eachLine, prev)
     return "%X" % (prev & 0xFFFFFFFF)
 
 
-def is_number(s) -> bool:
+def is_number(s: Any) -> bool:
     if s is not None:
         try:
             s = str(s)
@@ -253,7 +269,7 @@ def self_html_code(string_html: str = '', is_all: bool = True) -> str:
     return string_html
 
 
-def ant_path_matcher(ant_path, expected_path):
+def ant_path_matcher(ant_path: str, expected_path: str) -> bool:
     star = r"[^\/]+"
     double_star = r".*"
     slash = r"\/"
@@ -270,12 +286,14 @@ def ant_path_matcher(ant_path, expected_path):
     return True
 
 
-def check_email(email: str):
+def check_email(email: str) -> bool:
     re_str = r'^[a-zA-Z0-9_-]+(\.[a-zA-Z0-9_-]+){0,4}@[a-zA-Z0-9_-]+(\.[a-zA-Z0-9_-]+){0,4}$'
-    return re.match(re_str, email)
+    if re.match(re_str, email) is None:
+        return False
+    return True
 
 
-def get_args_from_dict(dt, ky, default=''):
+def get_args_from_dict(dt: Dict, ky: str, default: Optional[Any] = '') -> Optional[Any]:
     word = default if ky not in dt else dt[ky]
     if is_number(word):
         return word
@@ -284,7 +302,7 @@ def get_args_from_dict(dt, ky, default=''):
     return word
 
 
-def get_variable_from_request(request, key_name, default='', method='check'):
+def get_variable_from_request(key_name: str, default: Optional[str] = '', method: str = 'check') -> Optional[Any]:
     method = 'check' if method is None or not isinstance(method, str) else str(method).strip().lower()
     if method == 'check':
         word = request.form.get(key_name, None)

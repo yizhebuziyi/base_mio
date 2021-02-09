@@ -2,22 +2,23 @@
 import tornado
 from tornado import escape
 from tornado import httputil
+from tornado.httputil import ResponseStartLine, HTTPHeaders
 from tornado.wsgi import WSGIContainer
 from tornado.ioloop import IOLoop
+# from numba import jit
 from typing import List, Tuple, Optional, Callable, Any, Type
 from types import TracebackType
-from numba import jit
 
-MIO_SYSTEM_VERSION = '1.2.9'
+MIO_SYSTEM_VERSION = '1.2.10'
 
 
 class WSGIContainerWithThread(WSGIContainer):
     @tornado.gen.coroutine
     def __call__(self, request):
         data = {}
-        response = []
+        response: List[bytes] = []
 
-        @jit(nogil=True, forceobj=True)
+        # @jit(nogil=True, forceobj=True)
         def start_response(
                 status: str,
                 headers: List[Tuple[str, str]],
@@ -36,19 +37,20 @@ class WSGIContainerWithThread(WSGIContainer):
         IOLoop.configure('tornado.platform.asyncio.AsyncIOLoop')
         loop = IOLoop.instance()
 
-        app_response = yield loop.run_in_executor(None, self.wsgi_application, WSGIContainer.environ(request),
+        app_response = yield loop.run_in_executor(None, self.wsgi_application,
+                                                  WSGIContainer.environ(request),
                                                   start_response)
         try:
             response.extend(app_response)
-            body = b''.join(response)
+            body: bytes = b''.join(response)
         finally:
             if hasattr(app_response, 'close'):
                 app_response.close()
         if not data:
             raise Exception('WSGI app did not call start_response')
         status_code_str, reason = str(data['status']).split(' ', 1)
-        status_code = int(status_code_str)
-        headers = data['headers']
+        status_code: int = int(status_code_str)
+        headers: List[tuple] = data['headers']
         header_set = set(k.lower() for (k, v) in headers)
         body = escape.utf8(body)
         if status_code != 304:
@@ -58,8 +60,8 @@ class WSGIContainerWithThread(WSGIContainer):
                 headers.append(('Content-Type', 'text/html; charset=UTF-8'))
         if 'server' not in header_set:
             headers.append(('Server', 'PyMio/{}'.format(MIO_SYSTEM_VERSION)))
-        start_line = httputil.ResponseStartLine('HTTP/1.1', status_code, reason)
-        header_obj = httputil.HTTPHeaders()
+        start_line: ResponseStartLine = httputil.ResponseStartLine('HTTP/1.1', status_code, reason)
+        header_obj: HTTPHeaders = httputil.HTTPHeaders()
         for key, value in headers:
             header_obj.add(key, value)
         assert request.connection is not None
