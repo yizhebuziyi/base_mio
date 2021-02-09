@@ -2,8 +2,11 @@
 import os
 import sys
 from flask import send_from_directory, render_template
-from mio.util.Helper import get_root_path
+from mio.util.Helper import get_root_path, get_real_ip
+from mio.util.Logs import LogHandler
 from . import main
+
+logger = LogHandler('view')
 
 
 @main.route('/favicon.ico')
@@ -14,6 +17,7 @@ def favicon():
 
 @main.route('/')
 def index():
+    logger.debug(u'当前访客的IP地址为:{}'.format(get_real_ip()))
     sys_ver = sys.version
     return render_template('index.html', sys_ver=sys_ver)
 

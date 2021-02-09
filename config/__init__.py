@@ -24,8 +24,6 @@ class Config:
     MONGODB_ENABLE = os.environ.get('MIO_MONGODB_ENABLE', False)
     # 是否使用Redis
     REDIS_ENABLE = os.environ.get('MIO_REDIS_ENABLE', False)
-    # 是否使用ssdb
-    SSDB_ENABLE = os.environ.get('MIO_SSDB_ENABLE', False)
     # 是否使用CORS
     CORS_ENABLE = os.environ.get('MIO_CORS_ENABLE', False)
     CORS_URI = os.environ.get('MIO_CORS_URI', {r"/*": {"origins": "*"}})
@@ -45,11 +43,6 @@ class DevelopmentConfig(Config):
         'password': 'password',
         'connect': False
     }
-    SSDB_SETTINGS = {
-        'host': 'localhost',
-        'port': 8888,
-        'auth': None
-    }
     REDIS_URL = 'redis://localhost:6379/0'
     SQLALCHEMY_DATABASE_URI = os.environ.get('DEV_DATABASE_URL') or 'postgresql://username:password@hostname/database'
 
@@ -63,11 +56,6 @@ class TestingConfig(Config):
         'password': 'password',
         'connect': False
     }
-    SSDB_SETTINGS = {
-        'host': 'localhost',
-        'port': 8888,
-        'auth': None
-    }
     REDIS_URL = 'redis://localhost:6379/0'
     SQLALCHEMY_DATABASE_URI = os.environ.get('TEST_DATABASE_URL') or 'postgresql://username:password@hostname/database'
     WTF_CSRF_ENABLED = False
@@ -80,11 +68,6 @@ class ProductionConfig(Config):
         'username': 'username',
         'password': 'password',
         'connect': False
-    }
-    SSDB_SETTINGS = {
-        'host': 'localhost',
-        'port': 8888,
-        'auth': None
     }
     REDIS_URL = 'redis://localhost:6379/0'
     SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL') or 'postgresql://username:password@hostname/database'

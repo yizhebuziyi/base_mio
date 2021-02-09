@@ -1,8 +1,9 @@
 # -*- encoding: utf-8 -*-
 from flask import current_app
 from flask_script import Manager
+from typing import List
 
-CliCommand = Manager(usage=u'Execute Command line.')
+CliCommand: Manager = Manager(usage=u'Execute Command line.')
 
 
 @CliCommand.option('-cls', '--clazz', dest='clazz', default=None,
@@ -14,19 +15,19 @@ def exe(clazz=None, args=None):
     if clazz is None:
         print(u'Execute cli function, like: shell.py cli exe -cls=cli.Hello.World.me')
         return
-    tmp = clazz.split('.')
-    file = '.'.join(tmp[0:-2])
-    clazz = tmp[-2]
-    method = tmp[-1]
+    tmp: List[str] = clazz.split('.')
+    file: str = '.'.join(tmp[0:-2])
+    clazz: str = tmp[-2]
+    method: str = tmp[-1]
     kwargs = {}
     if args is not None:
-        args = args.split('||')
+        args: List[str] = args.split('||')
         for arg in args:
-            tmp = arg.split('=')
+            tmp: List[str] = arg.split('=')
             if len(tmp) != 2:
                 continue
-            key = tmp[0]
-            value = '='.join(tmp[1:])
+            key: str = tmp[0]
+            value: str = '='.join(tmp[1:])
             kwargs[key] = value
     try:
         obj = __import__(file, globals(), locals(), clazz)
