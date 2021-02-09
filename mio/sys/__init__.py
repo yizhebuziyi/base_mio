@@ -13,7 +13,7 @@ from flask_wtf.csrf import CSRFProtect
 from flask_mongoengine import MongoEngine
 from flask_redis import FlaskRedis
 from flask_mail import Mail
-# from numba import jit
+from numba import jit
 from typing import Tuple, Optional, List
 from mio.util.Helper import in_dict, is_enable
 from mio.util.Logs import LogHandler
@@ -27,7 +27,7 @@ csrf: CSRFProtect = CSRFProtect()
 login_manager: LoginManager = LoginManager()
 
 
-# @jit(nogil=True, forceobj=True)
+@jit(nogil=True, forceobj=True)
 def create_app(config_name: str, root_path: Optional[str] = None, config_clz: Optional[str] = None,
                logger_dir: Optional[str] = None, log_level: int = logging.DEBUG) -> Tuple[Flask, List[tuple]]:
     console = LogHandler('InitApp', logger_dir=logger_dir, log_level=log_level)
