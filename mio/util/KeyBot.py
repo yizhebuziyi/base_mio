@@ -42,13 +42,13 @@ class KeyBot(object):
         with open(key_file, 'rb') as kf:
             p = kf.read()
         if key_type == 1:
-            self.__privkey__.load_pkcs1(p)
+            self.__privkey__ = rsa.PrivateKey.load_pkcs1(p)
         else:
-            self.__pubkey__.load_pkcs1(p)
+            self.__pubkey__ = rsa.PublicKey.load_pkcs1(p)
 
     def encrypt(self, msg: str) -> Optional[bytes]:
         if self.__pubkey__ is None:
-            self.__load_key__(1)
+            self.__load_key__(0)
         if self.__pubkey__ is None:
             return None
         message: bytes = msg.encode('utf-8')
@@ -64,8 +64,8 @@ class KeyBot(object):
 
     def decrypt(self, crypto: bytes) -> Optional[str]:
         if self.__privkey__ is None:
-            self.__load_key__(0)
-        if self.__pubkey__ is None:
+            self.__load_key__(1)
+        if self.__privkey__ is None:
             return None
         message: bytes = rsa.decrypt(crypto, self.__privkey__)
         msg: str = str(message, encoding="utf-8")
@@ -77,17 +77,29 @@ class KeyBot(object):
         return message
 
     def get_base64_pubkey(self) -> str:
-        kfc: bytes = base64.b64encode(self.__pubkey__)
+        kfc: bytes = base64.b64encode(self.__pubkey__.save_pkcs1())
         return str(kfc, encoding="utf-8")
 
     def get_base64_privkey(self) -> str:
-        kfc: bytes = base64.b64encode(self.__privkey__)
+        kfc: bytes = base64.b64encode(self.__privkey__.save_pkcs1())
         return str(kfc, encoding="utf-8")
 
     def set_base64_pubkey(self, crypto: str):
         crypto_message: bytes = base64.b64decode(crypto)
-        self.__pubkey__.load_pkcs1(crypto_message)
+        self.__pubkey__ = rsa.PublicKey.load_pkcs1(crypto_message)
 
     def set_base64_privkey(self, crypto: str):
         crypto_message: bytes = base64.b64decode(crypto)
-        self.__privkey__.load_pkcs1(crypto_message)
+        self.__privkey__ = rsa.PrivateKey.load_pkcs1(crypto_message)
+
+    def get_pubkey(self) -> bytes:
+        return self.__pubkey__.save_pkcs1()
+
+    def get_privkey(self) -> bytes:
+        return self.__privkey__.save_pkcs1()
+
+    def set_pubkey(self, crypto_message: bytes):
+        self.__pubkey__ = rsa.PublicKey.load_pkcs1(crypto_message)
+
+    def set_privkey(self, crypto_message: bytes):
+        self.__privkey__ = rsa.PrivateKey.load_pkcs1(crypto_message)

@@ -17,9 +17,9 @@ class LogHandler(object):
             datefmt=datefmt
         )
         if logger_dir:
-            logger_path = os.path.join(logger_dir, logger_name)
-            if not os.path.isdir(logger_path):
-                os.makedirs(logger_path)
+            logger_path = os.path.join(logger_dir, '{}.log'.format(logger_name))
+            if not os.path.isdir(logger_dir):
+                os.makedirs(logger_dir)
             daiquiri.setup(level=log_level, outputs=(
                 daiquiri.output.Stream(formatter=formatter),
                 daiquiri.output.File(logger_path, formatter=formatter),
