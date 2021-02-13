@@ -5,9 +5,9 @@ import zlib
 import random
 import string
 import time
+from datetime import datetime, timedelta, timezone
 # from numba import jit
 from flask import request
-from datetime import datetime, timedelta
 from typing import Any, Tuple, Union, Optional, List, Dict
 from daiquiri import KeywordArgumentAdapter
 
@@ -324,3 +324,8 @@ def get_variable_from_request(key_name: str, default: Optional[str] = '', method
     if is_number(word):
         return word
     return str(word).strip()
+
+
+def get_utc_now() -> int:
+    dt = int(time.mktime(datetime.now(timezone.utc).timetuple()))
+    return dt
