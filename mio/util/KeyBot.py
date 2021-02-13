@@ -7,20 +7,19 @@ from typing import Optional, List
 
 class KeyBot(object):
     __key_path__: str
-    __nbits__: int
     __pubkey__: Optional[rsa.PublicKey] = None
     __privkey__: Optional[rsa.PrivateKey] = None
 
-    def __init__(self, key_path: Optional[str] = None, nbits: int = 2048):
+    def __init__(self, key_path: Optional[str] = None):
         # 如果只想做一次性加密，就不需要设置文件路径
         self.__key_path = key_path
-        self.__nbits__ = nbits
         if key_path:
             if not os.path.isdir(key_path):
                 os.makedirs(key_path)
 
-    def gen_new_key(self, is_save: bool = True):
-        pubkey, privkey = rsa.newkeys(self.__nbits__)
+    def gen_new_key(self, is_save: bool = True, nbits: int = 2048, accurate: bool = True, poolsize: int = 1,
+                    exponent: int = 65537):
+        pubkey, privkey = rsa.newkeys(nbits, accurate, poolsize, exponent)
         self.__pubkey__ = pubkey
         self.__privkey__ = privkey
         if is_save and self.__key_path:
@@ -49,8 +48,8 @@ class KeyBot(object):
     def encrypt(self, msg: str) -> Optional[bytes]:
         if self.__pubkey__ is None:
             self.__load_key__(0)
-        if self.__pubkey__ is None:
-            return None
+            if self.__pubkey__ is None:
+                return None
         message: bytes = msg.encode('utf-8')
         crypto: bytes = rsa.encrypt(message, self.__pubkey__)
         return crypto
@@ -65,8 +64,8 @@ class KeyBot(object):
     def decrypt(self, crypto: bytes) -> Optional[str]:
         if self.__privkey__ is None:
             self.__load_key__(1)
-        if self.__privkey__ is None:
-            return None
+            if self.__privkey__ is None:
+                return None
         message: bytes = rsa.decrypt(crypto, self.__privkey__)
         msg: str = str(message, encoding="utf-8")
         return msg
@@ -76,11 +75,19 @@ class KeyBot(object):
         message: Optional[str] = self.decrypt(crypto_message)
         return message
 
-    def get_base64_pubkey(self) -> str:
+    def get_base64_pubkey(self) -> Optional[str]:
+        if self.__pubkey__ is None:
+            self.__load_key__(0)
+            if self.__pubkey__ is None:
+                return None
         kfc: bytes = base64.b64encode(self.__pubkey__.save_pkcs1())
         return str(kfc, encoding="utf-8")
 
-    def get_base64_privkey(self) -> str:
+    def get_base64_privkey(self) -> Optional[str]:
+        if self.__privkey__ is None:
+            self.__load_key__(1)
+            if self.__privkey__ is None:
+                return None
         kfc: bytes = base64.b64encode(self.__privkey__.save_pkcs1())
         return str(kfc, encoding="utf-8")
 
@@ -92,10 +99,18 @@ class KeyBot(object):
         crypto_message: bytes = base64.b64decode(crypto)
         self.__privkey__ = rsa.PrivateKey.load_pkcs1(crypto_message)
 
-    def get_pubkey(self) -> bytes:
+    def get_pubkey(self) -> Optional[bytes]:
+        if self.__pubkey__ is None:
+            self.__load_key__(0)
+            if self.__pubkey__ is None:
+                return None
         return self.__pubkey__.save_pkcs1()
 
-    def get_privkey(self) -> bytes:
+    def get_privkey(self) -> Optional[bytes]:
+        if self.__privkey__ is None:
+            self.__load_key__(1)
+            if self.__privkey__ is None:
+                return None
         return self.__privkey__.save_pkcs1()
 
     def set_pubkey(self, crypto_message: bytes):
