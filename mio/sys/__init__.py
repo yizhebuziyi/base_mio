@@ -16,7 +16,7 @@ from flask_mail import Mail
 # from numba import jit
 from typing import Tuple, Optional, List
 from mio.util.Helper import in_dict, is_enable
-from mio.util.Logs import LogHandler
+from mio.util.Logs import LogHandler, LoggerType
 from mio.sys.wsgi import MIO_SYSTEM_VERSION
 
 mail: Mail = Mail()
@@ -29,8 +29,9 @@ login_manager: LoginManager = LoginManager()
 
 # @jit(nogil=True, forceobj=True)
 def create_app(config_name: str, root_path: Optional[str] = None, config_clz: Optional[str] = None,
-               logger_dir: Optional[str] = None, log_level: int = logging.DEBUG) -> Tuple[Flask, List[tuple]]:
-    console = LogHandler('InitApp', logger_dir=logger_dir, log_level=log_level)
+               logger_type: LoggerType = LoggerType.CONSOLE,
+               log_level: int = logging.DEBUG) -> Tuple[Flask, List[tuple]]:
+    console = LogHandler('InitApp', logger_type=logger_type, log_level=log_level)
     console.info(u'Initializing the system......profile: {}'.format(config_name))
     config_clz: str = 'config' if not isinstance(config_clz, str) else config_clz.strip()
     config_path: str = os.path.join(root_path, config_clz.replace('.', '/'))
