@@ -11,6 +11,7 @@ flask_cors
 flask_script
 flask_redis
 flask_mail
+flask_caching
 gunicorn
 daiquiri
 fleming

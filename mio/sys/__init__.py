@@ -14,6 +14,8 @@ from flask_mongoengine import MongoEngine
 from flask_redis import FlaskRedis
 from flask_mail import Mail
 from numba import jit
+from flask_caching import Cache
+# from numba import jit
 from typing import Tuple, Optional, List
 from mio.util.Helper import in_dict, is_enable
 from mio.util.Logs import LogHandler, LoggerType
@@ -25,12 +27,14 @@ db: MongoEngine = MongoEngine()
 redis_db: FlaskRedis = FlaskRedis()
 csrf: CSRFProtect = CSRFProtect()
 login_manager: LoginManager = LoginManager()
+cache: Cache
 
 
 @jit(nogil=True, forceobj=True)
 def create_app(config_name: str, root_path: Optional[str] = None, config_clz: Optional[str] = None,
                logger_type: LoggerType = LoggerType.CONSOLE,
                log_level: int = logging.DEBUG) -> Tuple[Flask, List[tuple]]:
+    global cache
     console = LogHandler('InitApp', logger_type=logger_type, log_level=log_level)
     console.info(u'Initializing the system......profile: {}'.format(config_name))
     config_clz: str = 'config' if not isinstance(config_clz, str) else config_clz.strip()
@@ -95,6 +99,8 @@ def create_app(config_name: str, root_path: Optional[str] = None, config_clz: Op
             console.error(u'CORS_URI not define.')
             sys.exit(0)
         CORS(app, resources=app.config['CORS_URI'])
+    if is_enable(app.config, 'CACHED_ENABLE'):
+        cache = Cache(app)
     blueprints_config: List[dict] = config_yaml['blueprint'] if in_dict(config_yaml, 'blueprint') else []
     for blueprint in blueprints_config:
         key: str = list(blueprint.keys())[0]

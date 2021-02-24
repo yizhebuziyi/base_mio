@@ -9,7 +9,7 @@ from numba import jit
 from typing import List, Tuple, Optional, Callable, Any, Type
 from types import TracebackType
 
-MIO_SYSTEM_VERSION = '1.2.16'
+MIO_SYSTEM_VERSION = '1.2.18'
 
 
 class WSGIContainerWithThread(WSGIContainer):

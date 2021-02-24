@@ -2,11 +2,13 @@
 import os
 import re
 import zlib
+import base64
 import random
 import string
+import hashlib
 import time
 from datetime import datetime, timedelta, timezone
-# from numba import jit
+from decimal import Decimal
 from flask import request
 from typing import Any, Tuple, Union, Optional, List, Dict
 from daiquiri import KeywordArgumentAdapter
@@ -329,3 +331,54 @@ def get_variable_from_request(key_name: str, default: Optional[str] = '', method
 def get_utc_now() -> int:
     dt = int(time.mktime(datetime.now(timezone.utc).timetuple()))
     return dt
+
+
+def microtime(get_as_float=False, max_ms_lan: int = 6) -> str:
+    d = datetime.now()
+    t = time.mktime(d.timetuple())
+    ms: float = d.microsecond / 1000000.
+    if get_as_float:
+        ms_txt = str(ms)
+        if len(ms_txt) >= max_ms_lan + 2:
+            ms_txt = ms_txt[:max_ms_lan + 2]
+        else:
+            max_loop: int = (max_ms_lan - len(ms_txt)) + 2
+            for i in range(max_loop):
+                ms_txt = '{}0'.format(ms_txt)
+        txt_long = '0.'
+        for i in range(max_ms_lan):
+            txt_long = '{}0'.format(txt_long)
+        a = Decimal(ms_txt).quantize(Decimal(txt_long))
+        b = Decimal(t)
+        dt = a + b
+        return str(dt)
+    else:
+        return '%f %d' % (ms, t)
+
+
+def md5(txt: str) -> str:
+    md = hashlib.md5()
+    md.update(txt.encode('utf-8'))
+    return md.hexdigest()
+
+
+def base64_encode(message: bytes, is_bytes: bool = False) -> Union[bytes, str]:
+    crypto: bytes = base64.b64encode(message)
+    if is_bytes:
+        return crypto
+    return crypto.decode('utf-8')
+
+
+def base64_decode(crypto: str, is_bytes: bool = False) -> Union[bytes, str]:
+    message: bytes = base64.b64decode(crypto)
+    if is_bytes:
+        return message
+    return message.decode('utf-8')
+
+
+def base64_txt_encode(message: str) -> str:
+    return str(base64_encode(message.encode('utf-8')))
+
+
+def base64_txt_decode(crypto: str) -> str:
+    return str(base64_decode(crypto))
