@@ -14,7 +14,6 @@ from flask_mongoengine import MongoEngine
 from flask_redis import FlaskRedis
 from flask_mail import Mail
 from flask_caching import Cache
-from numba import jit
 from typing import Tuple, Optional, List
 from mio.util.Helper import in_dict, is_enable
 from mio.util.Logs import LogHandler, LoggerType
@@ -29,7 +28,6 @@ login_manager: LoginManager = LoginManager()
 cache: Cache
 
 
-@jit(nogil=True, forceobj=True)
 def create_app(config_name: str, root_path: Optional[str] = None, config_clz: Optional[str] = None,
                logger_type: LoggerType = LoggerType.CONSOLE,
                log_level: int = logging.DEBUG) -> Tuple[Flask, List[tuple]]:
