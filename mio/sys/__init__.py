@@ -13,9 +13,8 @@ from flask_wtf.csrf import CSRFProtect
 from flask_mongoengine import MongoEngine
 from flask_redis import FlaskRedis
 from flask_mail import Mail
-from numba import jit
 from flask_caching import Cache
-# from numba import jit
+from numba import jit
 from typing import Tuple, Optional, List
 from mio.util.Helper import in_dict, is_enable
 from mio.util.Logs import LogHandler, LoggerType
