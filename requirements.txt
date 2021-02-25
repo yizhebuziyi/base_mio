@@ -15,3 +15,4 @@ flask_caching
 gunicorn
 daiquiri
 fleming
+numba
