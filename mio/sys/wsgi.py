@@ -5,7 +5,7 @@ from tornado import httputil
 from tornado.httputil import ResponseStartLine, HTTPHeaders
 from tornado.wsgi import WSGIContainer
 from tornado.ioloop import IOLoop
-from numba import jit
+# from numba import jit
 from typing import List, Tuple, Optional, Callable, Any, Type
 from types import TracebackType
 
@@ -18,7 +18,7 @@ class WSGIContainerWithThread(WSGIContainer):
         data = {}
         response: List[bytes] = []
 
-        @jit(nogil=True, forceobj=True)
+        # @jit(nogil=True, forceobj=True)
         def start_response(
                 status: str,
                 headers: List[Tuple[str, str]],
