@@ -43,7 +43,7 @@ def get_real_ip() -> str:
 
 
 def timestamp2str(timestamp: int, iso_format: str = '%Y-%m-%d %H:%M:%S', tz: int = 8,
-                  logger: Optional[KeywordArgumentAdapter] = None) -> str:
+                  logger: Optional[KeywordArgumentAdapter] = None) -> Optional[str]:
     dt = None
     try:
         utc_time = datetime.fromtimestamp(timestamp)
@@ -56,7 +56,7 @@ def timestamp2str(timestamp: int, iso_format: str = '%Y-%m-%d %H:%M:%S', tz: int
 
 
 def str2timestamp(date: str, iso_format: str = '%Y-%m-%d %H:%M:%S',
-                  logger: Optional[KeywordArgumentAdapter] = None) -> int:
+                  logger: Optional[KeywordArgumentAdapter] = None) -> Optional[int]:
     ts = None
     try:
         time_array = time.strptime(date, iso_format)
