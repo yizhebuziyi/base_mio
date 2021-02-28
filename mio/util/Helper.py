@@ -31,9 +31,19 @@ def is_enable(dic: dict, key: str) -> bool:
 
 
 def get_real_ip() -> str:
+    real_ip: str = ''
     if 'HTTP_CF_CONNECTING_IP' in request.environ:
         real_ip = request.environ['HTTP_CF_CONNECTING_IP']
-    elif 'HTTP_X_REAL_IP' in request.environ:
+    elif 'HTTP_FORWARDED' in request.environ:
+        http_forwarded: str = str(request.environ['HTTP_FORWARDED'])
+        xp = http_forwarded.split(';')
+        for s in xp:
+            if s.startswith('for='):
+                _, real_ip, *_ = s.split('=')
+                break
+    if len(real_ip) > 0:
+        return real_ip
+    if 'HTTP_X_REAL_IP' in request.environ:
         real_ip = request.environ['HTTP_X_REAL_IP']
     elif 'HTTP_X_FORWARDED_FOR' in request.environ:
         real_ip = request.environ['HTTP_X_FORWARDED_FOR']
