@@ -34,6 +34,8 @@ def get_real_ip() -> str:
     real_ip: str = ''
     if 'HTTP_CF_CONNECTING_IP' in request.environ:
         real_ip = request.environ['HTTP_CF_CONNECTING_IP']
+    elif 'HTTP_X_CLIENT' in request.environ:
+        real_ip = request.environ['HTTP_X_CLIENT']
     elif 'HTTP_FORWARDED' in request.environ:
         http_forwarded: str = str(request.environ['HTTP_FORWARDED'])
         xp = http_forwarded.split(';')
