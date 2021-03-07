@@ -14,6 +14,22 @@ from typing import Any, Tuple, Union, Optional, List, Dict
 from daiquiri import KeywordArgumentAdapter
 
 
+def check_ua(keys: List[str]) -> bool:
+    user_agent: str = str(request.headers.get("User-Agent")).lower()
+    for k in keys:
+        if user_agent.find(k.lower()) >= 0:
+            return True
+    return False
+
+
+def check_bot() -> bool:
+    return check_ua(['bot', 'spider', 'google'])
+
+
+def check_ie() -> bool:
+    return check_ua(['MSIE', 'like gecko'])
+
+
 def in_dict(dic: dict, key: str) -> bool:
     for kt in dic.keys():
         if kt == key:
@@ -42,6 +58,7 @@ def get_real_ip() -> str:
         for s in xp:
             if s.startswith('for='):
                 _, real_ip, *_ = s.split('=')
+                real_ip = check_is_ip(real_ip)
                 break
     if len(real_ip) > 0:
         return real_ip
@@ -52,6 +69,24 @@ def get_real_ip() -> str:
     else:
         real_ip = request.environ['REMOTE_ADDR']
     return real_ip
+
+
+def check_is_ip(ip_addr: str):
+    points: List[str] = ['', '', '', '']
+    temp = ip_addr.split('.')
+    if len(temp) < 4:
+        return ''
+    for i in range(4):
+        _text_ = str(temp[i])
+        for start in range(len(_text_)):
+            end: int = start + 1
+            _word_: str = _text_[start:end]
+            if is_number(_word_):
+                point: str = points[i]
+                point = point + '' + _word_
+                points[i] = point
+    ip_addr = '.'.join(points)
+    return ip_addr
 
 
 def timestamp2str(timestamp: int, iso_format: str = '%Y-%m-%d %H:%M:%S', tz: int = 8,
