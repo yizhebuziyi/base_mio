@@ -13,10 +13,12 @@ from mio.sys import create_app
 from mio.sys.wsgi import WSGIContainerWithThread
 from config import MIO_HOST, MIO_PORT
 
-IOLoop.configure('tornado.platform.asyncio.AsyncIOLoop')
 try:
     os.environ['TZ'] = os.environ.get('MIO_TIMEZONE') or 'Asia/Shanghai'
     time.tzset()
+    import uvloop
+
+    uvloop.install()
 except:
     pass
 

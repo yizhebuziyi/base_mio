@@ -48,7 +48,6 @@ class DevelopmentConfig(Config):
     REDIS_URL = 'redis://localhost:6379/0'
     CACHE_TYPE = 'simple'
     CACHE_REDIS_URL = REDIS_URL
-    SQLALCHEMY_DATABASE_URI = os.environ.get('DEV_DATABASE_URL') or 'postgresql://username:password@hostname/database'
 
 
 class TestingConfig(Config):
@@ -63,8 +62,6 @@ class TestingConfig(Config):
     REDIS_URL = 'redis://localhost:6379/0'
     CACHE_TYPE = 'simple'
     CACHE_REDIS_URL = REDIS_URL
-    SQLALCHEMY_DATABASE_URI = os.environ.get('TEST_DATABASE_URL') or 'postgresql://username:password@hostname/database'
-    WTF_CSRF_ENABLED = False
 
 
 class ProductionConfig(Config):
@@ -78,7 +75,6 @@ class ProductionConfig(Config):
     REDIS_URL = 'redis://localhost:6379/0'
     CACHE_TYPE = 'simple'
     CACHE_REDIS_URL = REDIS_URL
-    SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL') or 'postgresql://username:password@hostname/database'
 
 
 config = {
