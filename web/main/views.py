@@ -2,11 +2,19 @@
 import os
 import sys
 from flask import send_from_directory, render_template
+from typing import Optional
 from mio.util.Helper import get_root_path, get_real_ip
 from mio.util.Logs import LogHandler
+from mio.util.Local import I18n
 from . import main
 
 logger = LogHandler('view')
+
+
+@main.app_template_filter("get_local_text")
+def get_local_text(text: str, lang: Optional[str] = None):
+    tt = I18n(lang)
+    return tt.get_text(text)
 
 
 @main.route('/favicon.ico')
