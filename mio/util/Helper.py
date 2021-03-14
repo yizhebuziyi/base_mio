@@ -89,12 +89,12 @@ def check_is_ip(ip_addr: str):
     return ip_addr
 
 
-def timestamp2str(timestamp: int, iso_format: str = '%Y-%m-%d %H:%M:%S', tz: int = 8,
+def timestamp2str(timestamp: int, iso_format: str = '%Y-%m-%d %H:%M:%S', hours: int = 0, minutes: int = 0,
                   logger: Optional[KeywordArgumentAdapter] = None) -> Optional[str]:
     dt = None
     try:
         utc_time = datetime.fromtimestamp(timestamp)
-        local_dt = utc_time + timedelta(hours=tz)
+        local_dt = utc_time + timedelta(hours=hours, minutes=minutes)
         dt = local_dt.strftime(iso_format)
     except Exception as e:
         if logger:

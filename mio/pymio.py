@@ -3,24 +3,17 @@
 import logging
 import os
 import sys
-import time
-from tornado.ioloop import IOLoop
-from tornado.web import Application, FallbackHandler
 
 root_path: str = os.path.abspath(os.path.dirname(__file__) + '/../')
 sys.path.append(root_path)
-from mio.sys import create_app
+from tornado.ioloop import IOLoop
+from tornado.web import Application, FallbackHandler
+from mio.sys import create_app, init_timezone, init_uvloop
 from mio.sys.wsgi import WSGIContainerWithThread
 from config import MIO_HOST, MIO_PORT
 
-try:
-    os.environ['TZ'] = os.environ.get('MIO_TIMEZONE') or 'Asia/Shanghai'
-    time.tzset()
-    import uvloop
-
-    uvloop.install()
-except:
-    pass
+init_timezone()
+init_uvloop()
 
 index = -1
 MIO_CONFIG: str = os.environ.get('MIO_CONFIG') or 'default'
