@@ -27,7 +27,9 @@ class I18n(object):
 
     def get_text(self, text: str) -> str:
         try:
+            if self._tran_ is None:
+                return text
             text = self._tran_.gettext(text)
-        except FileNotFoundError:
-            pass
+        except Exception as e:
+            str(e)
         return text

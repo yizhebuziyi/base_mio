@@ -7,7 +7,7 @@ import logging
 from flask import Flask, blueprints
 from flask_bcrypt import Bcrypt
 from flask_login import LoginManager
-# from flask_babel import Babel
+from flask_babel import Babel
 from flask_cors import CORS
 from flask_wtf.csrf import CSRFProtect
 from flask_mongoengine import MongoEngine
@@ -26,13 +26,13 @@ redis_db: FlaskRedis = FlaskRedis()
 csrf: CSRFProtect = CSRFProtect()
 login_manager: LoginManager = LoginManager()
 cache: Cache
-# babel: Babel
+babel: Babel
 
 
 def create_app(config_name: str, root_path: Optional[str] = None, config_clz: Optional[str] = None,
                logger_type: LoggerType = LoggerType.CONSOLE,
                log_level: int = logging.DEBUG) -> Tuple[Flask, List[tuple]]:
-    global cache
+    global cache, babel
     console = LogHandler('InitApp', logger_type=logger_type, log_level=log_level)
     console.info(u'Initializing the system......profile: {}'.format(config_name))
     config_clz: str = 'config' if not isinstance(config_clz, str) else config_clz.strip()
@@ -70,7 +70,7 @@ def create_app(config_name: str, root_path: Optional[str] = None, config_clz: Op
     app: Flask = Flask(__name__, static_folder=static_folder, template_folder=template_folder)
     app.config.from_object(config[config_name])
     config[config_name].init_app(app)
-    # babel = Babel(app)
+    babel = Babel(app)
     if in_dict(base_config, 'csrf'):
         if is_enable(base_config['csrf'], 'enable'):
             csrf.init_app(app)
