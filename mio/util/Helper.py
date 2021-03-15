@@ -375,13 +375,21 @@ def get_variable_from_request(key_name: str, default: Optional[str] = '', method
     return str(word).strip()
 
 
+def get_local_now(hours: int = 0, minutes: int = 0) -> int:
+    utc_dt = datetime.utcnow().replace(tzinfo=timezone.utc)
+    d = utc_dt.astimezone(timezone(timedelta(hours=hours, minutes=minutes)))
+    dt = int(time.mktime(d.timetuple()))
+    return dt
+
+
 def get_utc_now() -> int:
     dt = int(time.mktime(datetime.now(timezone.utc).timetuple()))
     return dt
 
 
-def microtime(get_as_float=False, max_ms_lan: int = 6) -> str:
-    d = datetime.now()
+def microtime(get_as_float=False, max_ms_lan: int = 6, hours: int = 0, minutes: int = 0) -> str:
+    utc_dt = datetime.utcnow().replace(tzinfo=timezone.utc)
+    d = utc_dt.astimezone(timezone(timedelta(hours=hours, minutes=minutes)))
     t = time.mktime(d.timetuple())
     ms: float = d.microsecond / 1000000.
     if get_as_float:
@@ -400,7 +408,7 @@ def microtime(get_as_float=False, max_ms_lan: int = 6) -> str:
         dt = a + b
         return str(dt)
     else:
-        return '%f %d' % (ms, t)
+        return '%.8f %d' % (ms, t)
 
 
 def md5(txt: str) -> str:
@@ -409,14 +417,17 @@ def md5(txt: str) -> str:
     return md.hexdigest()
 
 
-def base64_encode(message: bytes, is_bytes: bool = False) -> Union[bytes, str]:
+def base64_encode(message: bytes, is_bytes: bool = True) -> Union[bytes, str]:
     crypto: bytes = base64.b64encode(message)
     if is_bytes:
         return crypto
     return crypto.decode('utf-8')
 
 
-def base64_decode(crypto: str, is_bytes: bool = False) -> Union[bytes, str]:
+def base64_decode(crypto: str, is_bytes: bool = True) -> Union[bytes, str]:
+    missing_padding = 4 - len(crypto) % 4
+    if missing_padding:
+        crypto += '=' * missing_padding
     message: bytes = base64.b64decode(crypto)
     if is_bytes:
         return message
@@ -424,8 +435,8 @@ def base64_decode(crypto: str, is_bytes: bool = False) -> Union[bytes, str]:
 
 
 def base64_txt_encode(message: str) -> str:
-    return str(base64_encode(message.encode('utf-8')))
+    return str(base64_encode(message.encode('utf-8'), is_bytes=False))
 
 
 def base64_txt_decode(crypto: str) -> str:
-    return str(base64_decode(crypto))
+    return str(base64_decode(crypto, is_bytes=False))
