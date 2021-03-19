@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 import os
 import re
+import copy
+import math
 import zlib
 import base64
 import random
@@ -8,6 +10,7 @@ import string
 import hashlib
 import time
 from datetime import datetime, timedelta, timezone
+from dateutil.relativedelta import relativedelta, MO, SU
 from decimal import Decimal
 from flask import request
 from typing import Any, Tuple, Union, Optional, List, Dict
@@ -102,12 +105,15 @@ def timestamp2str(timestamp: int, iso_format: str = '%Y-%m-%d %H:%M:%S', hours: 
     return dt
 
 
-def str2timestamp(date: str, iso_format: str = '%Y-%m-%d %H:%M:%S',
+def str2timestamp(date: str, iso_format: str = '%Y-%m-%d %H:%M:%S', hours: int = 0, minutes: int = 0,
                   logger: Optional[KeywordArgumentAdapter] = None) -> Optional[int]:
     ts = None
     try:
         time_array = time.strptime(date, iso_format)
         timestamp = time.mktime(time_array)
+        utc_time = datetime.fromtimestamp(timestamp)
+        local_dt = utc_time + timedelta(hours=hours, minutes=minutes)
+        timestamp = time.mktime(local_dt.timetuple())
         ts = int(timestamp)
     except Exception as e:
         if logger:
@@ -387,6 +393,85 @@ def get_utc_now() -> int:
     return dt
 
 
+def get_this_week_range(timestamp: int, hours: int = 0, minutes: int = 0) -> Tuple[int, int]:
+    try:
+        utc_time = datetime.fromtimestamp(timestamp)
+        local_dt = utc_time + timedelta(hours=hours, minutes=minutes)
+        monday = local_dt + relativedelta(weekday=MO(-1), hour=0, minute=0, second=0)
+        sunday = local_dt + relativedelta(weekday=SU, hour=0, minute=0, second=0)
+        return int(time.mktime(monday.timetuple())), int(time.mktime(sunday.timetuple()))
+    except Exception as e:
+        str(e)
+        return 0, 0
+
+
+def get_this_month_range(timestamp: int, hours: int = 0, minutes: int = 0) -> Tuple[int, int]:
+    try:
+        local_date: Optional[str] = timestamp2str(timestamp, '%Y-%m', hours=hours, minutes=minutes)
+        if local_date is None:
+            return 0, 0
+        start_year, start_month, *_ = local_date.split('-')
+        return get_month_range(start_year=int(start_year), start_month=int(start_month), long=0)
+    except Exception as e:
+        str(e)
+        return 0, 0
+
+
+def get_month_range(start_year: int, start_month: int, long: int) -> Tuple[int, int]:
+    try:
+        long = 1 if not is_number(long) else int(long)
+        timestamp: int = str2timestamp('{}-{}-1'.format(start_year, start_month), '%Y-%m-%d')
+        utc_time = datetime.fromtimestamp(timestamp)
+        if long >= 0:
+            first_day = utc_time + relativedelta(day=1, hour=0, minute=0, second=0)
+            last_day = utc_time + relativedelta(months=long, day=31, hour=0, minute=0, second=0)
+        else:
+            first_day = utc_time + relativedelta(months=long, day=1, hour=0, minute=0, second=0)
+            last_day = utc_time + relativedelta(day=31, hour=0, minute=0, second=0)
+        return int(time.mktime(first_day.timetuple())), int(time.mktime(last_day.timetuple()))
+    except Exception as e:
+        str(e)
+        return 0, 0
+
+
+def get_today(is_timestamp: bool = False, hours: int = 0, minutes: int = 0) -> Union[str, int]:
+    dn: str = timestamp2str(get_local_now(hours, minutes), '%Y-%m-%d', hours, minutes)
+    if not is_timestamp:
+        return dn
+    timestamp: int = str2timestamp(dn, '%Y-%m-%d', hours, minutes)
+    return timestamp
+
+
+def get_yesterday(is_timestamp: bool = False, hours: int = 0, minutes: int = 0) -> Union[str, int]:
+    _, dt = get_this_days_range(-1, hours, minutes)
+    if not is_timestamp:
+        return timestamp2str(dt, '%Y-%m-%d', hours, minutes)
+    return dt
+
+
+def get_this_days_range(long: int, hours: int = 0, minutes: int = 0) -> Tuple[int, int]:
+    long = 1 if not is_number(long) else int(long)
+    long = 1 if long == 0 else long
+    # 获取当前日期
+    dn: str = timestamp2str(get_local_now(hours, minutes), '%Y-%m-%d', hours, minutes)
+    start_time: int = str2timestamp(dn, '%Y-%m-%d', hours, minutes)
+    end_time: int
+    if long < 0:
+        # 如果是往前推的天数
+        end_time = copy.deepcopy(start_time)
+        end_time = end_time
+        start_time = start_time + (3600 * 24 * long)
+    else:
+        end_time = start_time + (3600 * 24 * long)
+    return start_time, end_time
+
+
+def get_now_microtime(max_ms_lan: int = 6, hours: int = 0, minutes: int = 0) -> int:
+    mt: Decimal = Decimal(microtime(get_as_float=True, max_ms_lan=max_ms_lan, hours=hours, minutes=minutes))
+    ms: Decimal = Decimal(str(int(math.pow(10, max_ms_lan))))
+    return int(mt * ms)
+
+
 def microtime(get_as_float=False, max_ms_lan: int = 6, hours: int = 0, minutes: int = 0) -> str:
     utc_dt = datetime.utcnow().replace(tzinfo=timezone.utc)
     d = utc_dt.astimezone(timezone(timedelta(hours=hours, minutes=minutes)))
@@ -400,10 +485,7 @@ def microtime(get_as_float=False, max_ms_lan: int = 6, hours: int = 0, minutes: 
             max_loop: int = (max_ms_lan - len(ms_txt)) + 2
             for i in range(max_loop):
                 ms_txt = '{}0'.format(ms_txt)
-        txt_long = '0.'
-        for i in range(max_ms_lan):
-            txt_long = '{}0'.format(txt_long)
-        a = Decimal(ms_txt).quantize(Decimal(txt_long))
+        a = rounded(Decimal(ms_txt), max_ms_lan)
         b = Decimal(t)
         dt = a + b
         return str(dt)
@@ -440,3 +522,13 @@ def base64_txt_encode(message: str) -> str:
 
 def base64_txt_decode(crypto: str) -> str:
     return str(base64_decode(crypto, is_bytes=False))
+
+
+def rounded(numerical: Any, decimal: int = 2) -> Decimal:
+    decimal = 0 if not is_number(decimal) or decimal <= 0 else decimal
+    decimal_place: str
+    if not is_number(numerical):
+        decimal_place = '%.{}f'.format(decimal) % 0
+        return Decimal(decimal_place)
+    decimal_place = '%.{}f'.format(decimal) % Decimal(str(numerical))
+    return Decimal(decimal_place)

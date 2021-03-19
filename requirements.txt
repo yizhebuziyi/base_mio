@@ -16,3 +16,4 @@ gunicorn
 daiquiri
 fleming
 uvloop
+python-dateutil
