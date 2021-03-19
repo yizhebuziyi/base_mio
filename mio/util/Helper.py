@@ -12,9 +12,9 @@ import time
 from datetime import datetime, timedelta, timezone
 from dateutil.relativedelta import relativedelta, MO, SU
 from decimal import Decimal
-from flask import request
-from typing import Any, Tuple, Union, Optional, List, Dict
+from flask import request, current_app
 from daiquiri import KeywordArgumentAdapter
+from typing import Any, Tuple, Union, Optional, List, Dict
 
 
 def check_ua(keys: List[str]) -> bool:
@@ -532,3 +532,90 @@ def rounded(numerical: Any, decimal: int = 2) -> Decimal:
         return Decimal(decimal_place)
     decimal_place = '%.{}f'.format(decimal) % Decimal(str(numerical))
     return Decimal(decimal_place)
+
+
+def easy_encrypted(text: str, is_decode=True, key: Optional[str] = None, expiry: int = 0,
+                   logger: Optional[KeywordArgumentAdapter] = None) -> Optional[str]:
+    try:
+        if key is None or len(key) <= 0:
+            plan_key: str = current_app.config['SECRET_KEY']
+        else:
+            plan_key = key
+        key_c_length: int = 4  # 动态密匙长度，相同的明文会生成不同密文就是依靠动态密匙
+        key = md5(plan_key)  # 密匙
+        key_a: str = md5(key[0:16])  # 密匙a会参与加解密
+        key_b: str = md5(key[16:32])
+        key_c: str
+        if key_c_length <= 0:
+            key_c = ''
+        else:
+            if is_decode:
+                key_c = text[0:key_c_length]
+            else:
+                key_c = md5(microtime())[-key_c_length:]
+        crypt_key: str = key_a + '' + md5(key_a + '' + key_c)
+        key_length: int = len(crypt_key)
+        new_data: bytes
+        if is_decode:
+            new_data = base64_decode(text[key_c_length:])
+        else:
+            expiry = expiry + get_utc_now() if expiry > 0 else 0
+            expiry_str: str = '%010d' % expiry
+            plan_text: str = expiry_str + '' + md5(text + '' + key_b)[0:16] + '' + text
+            new_data = plan_text.encode('latin-1')  # 这里必须是latin-1编码，不然会出错
+        string_length: int = len(new_data)
+        decode_result: str = ''
+        encode_result: bytes = b''
+        box: List[int] = list(range(0, 256))
+        rnd_key: List[int] = []
+        # 产生密匙簿
+        for i in range(256):
+            start: int = i % key_length
+            end: int = start + 1
+            rnd_key.append(ord(crypt_key[start:end]))
+        j: int = 0
+        for i in range(256):
+            j = (j + box[i] + rnd_key[i]) % 256
+            _tmp_box_: int = copy.deepcopy(box[i])
+            box[i] = copy.deepcopy(box[j])
+            box[j] = copy.deepcopy(_tmp_box_)
+            # 重设索引
+            a: int = 0
+            j = 0
+        for i in range(string_length):
+            a = (a + 1) % 256
+            j = (j + box[a]) % 256
+            _tmp_box_: int = copy.deepcopy(box[a])
+            box[a] = copy.deepcopy(box[j])
+            box[j] = copy.deepcopy(_tmp_box_)
+            # 从密匙簿得出密匙进行异或，再转成字符
+            od1: int = new_data[i]
+            od2: int = box[(box[a] + box[j]) % 256]
+            co: int = (od1 ^ od2)
+            if is_decode:
+                decode_result = decode_result + chr(co)
+            else:
+                encode_result = encode_result + bytes(chr(co), encoding='latin-1')
+        if is_decode:
+            t1: int = int(decode_result[0:10])
+            t2: str = decode_result[10:26]
+            t3: str = md5(decode_result[26:] + key_b)[0:16]
+            if (t1 == 0 or t1 - get_utc_now() > 0) and t2 == t3:
+                return decode_result[26:]
+        else:
+            b64code: bytes = base64_encode(encode_result)
+            result: str = b64code.decode('latin-1')
+            result = result.replace('=', '')
+            result = key_c + '' + result
+            # 由于有一定概率加密失败，因此输出之前，先反向解析下试试
+            test_password: Optional[str] = easy_encrypted(result, key=plan_key, expiry=expiry, logger=logger)
+            if test_password == text:
+                return result
+    except Exception as e:
+        if is_decode:
+            msg = u'解密字符串:[{}]时发生异常:{}'
+        else:
+            msg = u'加密字符串:[{}]时发生异常:{}'
+        if logger:
+            logger.error(msg.format(text, e))
+    return None

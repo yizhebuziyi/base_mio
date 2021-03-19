@@ -24,11 +24,17 @@ class Config:
     MONGODB_ENABLE = os.environ.get('MIO_MONGODB_ENABLE', False)
     # 是否使用Redis
     REDIS_ENABLE = os.environ.get('MIO_REDIS_ENABLE', False)
+    # Redis前导
+    REDIS_KEY_PREFIX = 'PYMIO'
     # 是否使用CACHE
     CACHED_ENABLE = os.environ.get('MIO_CACHED_ENABLE', False)
     # 是否使用CORS
     CORS_ENABLE = os.environ.get('MIO_CORS_ENABLE', False)
     CORS_URI = os.environ.get('MIO_CORS_URI', {r"/*": {"origins": "*"}})
+    # 支持的语言
+    LANGUAGES = ['zh-CN']
+    # 默认语言
+    DEFAULT_LANGUAGE = 'zh-CN'
 
     @staticmethod
     def init_app(app):
