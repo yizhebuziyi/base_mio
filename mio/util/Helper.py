@@ -180,8 +180,12 @@ def write_txt_file(filename: str, txt: str = ' ', encoding: str = 'utf-8') -> Tu
 def read_txt_file(filename: str, encoding: str = 'utf-8') -> str:
     if not os.path.isfile(filename):
         return ''
-    with open(filename, 'r', encoding=encoding) as reader:
-        txt = reader.read()
+    txt = ''
+    with open(filename, 'r', encoding=encoding, errors='ignore') as reader:
+        for line in reader:
+            if line is None or len(line) <= 0:
+                continue
+            txt += line
     return txt
 
 
