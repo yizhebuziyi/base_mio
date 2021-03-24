@@ -25,7 +25,7 @@ def favicon():
 
 @main.route('/')
 def index():
-    logger.debug(u'当前访客的IP地址为:{}'.format(get_real_ip()))
+    # logger.debug(u'当前访客的IP地址为:{}'.format(get_real_ip()))
     sys_ver = sys.version
     return render_template('index.html', sys_ver=sys_ver)
 

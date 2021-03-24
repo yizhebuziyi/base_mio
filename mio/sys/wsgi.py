@@ -1,24 +1,21 @@
 # -*- coding: utf-8 -*-
-import tornado
-from tornado import escape
+from tornado import escape, gen
 from tornado import httputil
 from tornado.httputil import ResponseStartLine, HTTPHeaders
 from tornado.wsgi import WSGIContainer
 from tornado.ioloop import IOLoop
-# from numba import jit
 from typing import List, Tuple, Optional, Callable, Any, Type
 from types import TracebackType
 
-MIO_SYSTEM_VERSION = '1.3.7'
+MIO_SYSTEM_VERSION = '1.3.8'
 
 
 class WSGIContainerWithThread(WSGIContainer):
-    @tornado.gen.coroutine
+    @gen.coroutine
     def __call__(self, request):
         data = {}
         response: List[bytes] = []
 
-        # @jit(forceobj=True, parallel=True)
         def start_response(
                 status: str,
                 headers: List[Tuple[str, str]],
@@ -34,9 +31,7 @@ class WSGIContainerWithThread(WSGIContainer):
             data['headers'] = headers
             return response.append
 
-        IOLoop.configure('tornado.platform.asyncio.AsyncIOLoop')
         loop = IOLoop.instance()
-
         app_response = yield loop.run_in_executor(None, self.wsgi_application,
                                                   WSGIContainer.environ(request),
                                                   start_response)

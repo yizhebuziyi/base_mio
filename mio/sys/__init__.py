@@ -14,6 +14,7 @@ from flask_mongoengine import MongoEngine
 from flask_redis import FlaskRedis
 from flask_mail import Mail
 from flask_caching import Cache
+from tornado.ioloop import IOLoop
 from typing import Tuple, Optional, List
 from mio.util.Helper import in_dict, is_enable
 from mio.util.Logs import LogHandler, LoggerType
@@ -133,6 +134,8 @@ def init_timezone():
 def init_uvloop():
     try:
         import uvloop
-        uvloop.install()
+        import asyncio
+        asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
     except Exception as e:
-        str(e)
+        print(e)
+        IOLoop.configure('tornado.platform.asyncio.AsyncIOLoop')

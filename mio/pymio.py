@@ -1,12 +1,14 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-import logging
 import os
 import sys
+import asyncio
+import logging
+import multiprocessing
 
 root_path: str = os.path.abspath(os.path.dirname(__file__) + '/../')
 sys.path.append(root_path)
-from tornado.ioloop import IOLoop
+from tornado.httpserver import HTTPServer
 from tornado.web import Application, FallbackHandler
 from mio.sys import create_app, init_timezone, init_uvloop
 from mio.sys.wsgi import WSGIContainerWithThread
@@ -55,9 +57,11 @@ mWSGI: Application = Application(wss)
 
 if __name__ == '__main__':
     try:
-        http_server: Application = mWSGI
-        http_server.listen(MIO_PORT, MIO_HOST)
+        workers = multiprocessing.cpu_count()
+        server = HTTPServer(mWSGI)
+        server.bind(MIO_PORT, MIO_HOST)
+        server.start(workers)
         print("WebServer listen in http://{}:{}".format(MIO_HOST, MIO_PORT))
-        IOLoop.instance().start()
+        asyncio.get_event_loop().run_forever()
     except KeyboardInterrupt:
         print("WebServer Closed.")
