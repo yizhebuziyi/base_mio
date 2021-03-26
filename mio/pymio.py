@@ -52,7 +52,7 @@ for arg in sys.argv:
     if temp[0].lower() == 'config':
         MIO_CONFIG = temp[1]
         continue
-app, wss = create_app(MIO_CONFIG, root_path, MIO_APP_CONFIG, log_level=log_level)
+app, wss, console_log = create_app(MIO_CONFIG, root_path, MIO_APP_CONFIG, log_level=log_level)
 wss.append((r'.*', FallbackHandler, dict(fallback=WSGIContainerWithThread(app))))
 mWSGI: Application = Application(wss)
 
@@ -60,12 +60,12 @@ if __name__ == '__main__':
     try:
         server = HTTPServer(mWSGI)
         server.bind(MIO_PORT, MIO_HOST)
+        console_log.info("WebServer listen in http://{}:{}".format(MIO_HOST, MIO_PORT))
         if MIO_LIMIT_CPU <= 0:
             workers = multiprocessing.cpu_count()
             server.start(workers)
         else:
             server.start(MIO_LIMIT_CPU)
-        print("WebServer listen in http://{}:{}".format(MIO_HOST, MIO_PORT))
         asyncio.get_event_loop().run_forever()
     except KeyboardInterrupt:
-        print("WebServer Closed.")
+        console_log.info("WebServer Closed.")
