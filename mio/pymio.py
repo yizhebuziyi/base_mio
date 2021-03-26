@@ -10,7 +10,7 @@ root_path: str = os.path.abspath(os.path.dirname(__file__) + '/../')
 sys.path.append(root_path)
 from tornado.httpserver import HTTPServer
 from tornado.web import Application, FallbackHandler
-from mio.sys import create_app, init_timezone, init_uvloop
+from mio.sys import create_app, init_timezone, init_uvloop, get_cpu_limit
 from mio.sys.wsgi import WSGIContainerWithThread
 from config import MIO_HOST, MIO_PORT
 
@@ -20,6 +20,7 @@ init_uvloop()
 index = -1
 MIO_CONFIG: str = os.environ.get('MIO_CONFIG') or 'default'
 MIO_APP_CONFIG: str = os.environ.get('MIO_APP_CONFIG') or 'config'
+MIO_LIMIT_CPU: int = get_cpu_limit()
 if MIO_CONFIG == 'production':
     log_level = logging.INFO
 else:
@@ -57,10 +58,13 @@ mWSGI: Application = Application(wss)
 
 if __name__ == '__main__':
     try:
-        workers = multiprocessing.cpu_count()
         server = HTTPServer(mWSGI)
         server.bind(MIO_PORT, MIO_HOST)
-        server.start(workers)
+        if MIO_LIMIT_CPU <= 0:
+            workers = multiprocessing.cpu_count()
+            server.start(workers)
+        else:
+            server.start(MIO_LIMIT_CPU)
         print("WebServer listen in http://{}:{}".format(MIO_HOST, MIO_PORT))
         asyncio.get_event_loop().run_forever()
     except KeyboardInterrupt:

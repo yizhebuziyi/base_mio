@@ -7,7 +7,7 @@ from tornado.ioloop import IOLoop
 from typing import List, Tuple, Optional, Callable, Any, Type
 from types import TracebackType
 
-MIO_SYSTEM_VERSION = '1.3.8'
+MIO_SYSTEM_VERSION = '1.3.9'
 
 
 class WSGIContainerWithThread(WSGIContainer):

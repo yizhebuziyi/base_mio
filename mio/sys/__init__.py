@@ -16,7 +16,7 @@ from flask_mail import Mail
 from flask_caching import Cache
 from tornado.ioloop import IOLoop
 from typing import Tuple, Optional, List
-from mio.util.Helper import in_dict, is_enable
+from mio.util.Helper import in_dict, is_enable, is_number
 from mio.util.Logs import LogHandler, LoggerType
 from mio.sys.wsgi import MIO_SYSTEM_VERSION
 
@@ -139,3 +139,8 @@ def init_uvloop():
     except Exception as e:
         print(e)
         IOLoop.configure('tornado.platform.asyncio.AsyncIOLoop')
+
+
+def get_cpu_limit() -> int:
+    cpu_limit: int = 0 if not is_number(os.environ.get('MIO_LIMIT_CPU')) else int(os.environ.get('MIO_LIMIT_CPU'))
+    return cpu_limit
