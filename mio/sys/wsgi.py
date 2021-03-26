@@ -1,24 +1,24 @@
 # -*- coding: utf-8 -*-
+import asyncio
 from tornado import escape, gen
 from tornado import httputil
-from tornado.httputil import ResponseStartLine, HTTPHeaders
+from tornado.httputil import ResponseStartLine, HTTPHeaders, HTTPServerRequest
 from tornado.wsgi import WSGIContainer
-from tornado.ioloop import IOLoop
-from typing import List, Tuple, Optional, Callable, Any, Type
+from typing import List, Tuple, Optional, Callable, Any, Type, Dict
 from types import TracebackType
 
-MIO_SYSTEM_VERSION = '1.3.9'
+MIO_SYSTEM_VERSION = '1.3.10'
 
 
 class WSGIContainerWithThread(WSGIContainer):
     @gen.coroutine
-    def __call__(self, request):
-        data = {}
+    def __call__(self, request: HTTPServerRequest):
+        data: Dict[str, Any] = {}
         response: List[bytes] = []
 
         def start_response(
                 status: str,
-                headers: List[Tuple[str, str]],
+                http_headers: List[Tuple[str, str]],
                 exec_info: Optional[
                     Tuple[
                         Optional[Type[BaseException]],
@@ -28,10 +28,12 @@ class WSGIContainerWithThread(WSGIContainer):
                 ] = None,
         ) -> Callable[[bytes], Any]:
             data['status'] = status
-            data['headers'] = headers
+            data['headers'] = http_headers
+            if exec_info:
+                print(exec_info)
             return response.append
 
-        loop = IOLoop.instance()
+        loop = asyncio.get_event_loop()
         app_response = yield loop.run_in_executor(None, self.wsgi_application,
                                                   WSGIContainer.environ(request),
                                                   start_response)
