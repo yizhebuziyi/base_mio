@@ -11,8 +11,8 @@ LimitNOFILE=infinity
 LimitFSIZE=infinity
 LimitCPU=infinity
 LimitAS=infinity
-ExecStart=/bin/bash /home/${1}/${2}/run_gunicorn.sh ${2} ${3}
-ExecStop=/bin/bash /home/${1}/${2}/stop_gunicorn.sh ${2} ${3}
+ExecStart=/usr/local/www/${1}/${2}/run_webserver.sh
+ExecStop=/usr/local/www/${1}/${2}/stop_webserver.linux ${2}
 
 [Install]
 WantedBy=multi-user.target
