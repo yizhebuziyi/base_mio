@@ -12,6 +12,7 @@ from tornado.httpserver import HTTPServer
 from tornado.web import Application, FallbackHandler
 from mio.sys import create_app, init_timezone, init_uvloop, get_cpu_limit
 from mio.sys.wsgi import WSGIContainerWithThread
+from mio.util.Logs import LoggerType
 from config import MIO_HOST, MIO_PORT
 
 init_timezone()
@@ -23,8 +24,10 @@ MIO_APP_CONFIG: str = os.environ.get('MIO_APP_CONFIG') or 'config'
 MIO_LIMIT_CPU: int = get_cpu_limit()
 if MIO_CONFIG == 'production':
     log_level = logging.INFO
+    log_type = LoggerType.CONSOLE_FILE
 else:
     log_level = logging.DEBUG
+    log_type = LoggerType.CONSOLE
 for arg in sys.argv:
     index += 1
     if index <= 0:
@@ -52,7 +55,7 @@ for arg in sys.argv:
     if temp[0].lower() == 'config':
         MIO_CONFIG = temp[1]
         continue
-app, wss, console_log = create_app(MIO_CONFIG, root_path, MIO_APP_CONFIG, log_level=log_level)
+app, wss, console_log = create_app(MIO_CONFIG, root_path, MIO_APP_CONFIG, log_level=log_level, logger_type=log_type)
 wss.append((r'.*', FallbackHandler, dict(fallback=WSGIContainerWithThread(app))))
 mWSGI: Application = Application(wss)
 

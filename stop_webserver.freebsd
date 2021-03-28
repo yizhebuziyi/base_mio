@@ -1,0 +1,47 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+import os
+import sys
+from typing import List, Any
+
+
+def is_number(s: Any) -> bool:
+    if s is not None:
+        try:
+            s = str(s)
+        except ValueError:
+            return False
+        try:
+            float(s)
+            return True
+        except ValueError:
+            pass
+
+        try:
+            import unicodedata
+            unicodedata.numeric(s)
+            return True
+        except (TypeError, ValueError):
+            pass
+
+    return False
+
+
+if __name__ == '__main__':
+    if len(sys.argv) <= 1:
+        print(u'Usage: stop_webserver.linux.py <service>\nexample: stop_webserver.linux.py sukiyaki.su')
+        exit()
+    resp: str = os.popen('ps -Aj | grep "{}" | grep "pymio\\.pyc"'.format(str(sys.argv[1]))).read()
+    lines: List[str] = resp.split('\n')
+    if len(lines) <= 0:
+        print(u'webserver not run.')
+        exit()
+    args: List[str] = lines[0].split(' ')
+    count = 0
+    for word in args:
+        if not is_number(word):
+            continue
+        count += 1
+        if count == 3:
+            os.system('bash stop_group_id.sh -{}'.format(word))
+            exit()

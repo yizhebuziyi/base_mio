@@ -31,7 +31,7 @@ babel: Babel
 
 
 def create_app(config_name: str, root_path: Optional[str] = None, config_clz: Optional[str] = None,
-               logger_type: LoggerType = LoggerType.CONSOLE,
+               logger_type: LoggerType = LoggerType,
                log_level: int = logging.DEBUG) -> Tuple[Flask, List[tuple], LogHandler]:
     global cache, babel
     console = LogHandler('PyMio', logger_type=logger_type, log_level=log_level)
