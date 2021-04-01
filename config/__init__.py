@@ -8,7 +8,7 @@ MIO_SITE_HOST = os.environ.get('MIO_SITE_HOST', MIO_HOST)
 
 
 class Config:
-    SECRET_KEY = os.environ.get('SECRET_KEY') or 'mio'  # 默认秘钥
+    SECRET_KEY = os.environ.get('SECRET_KEY') or 'PYMIO_SECRET_KEY'  # 默认秘钥
     SESSION_TYPE = 'filesystem'
     # 邮件系统设置相关
     MIO_MAIL = False

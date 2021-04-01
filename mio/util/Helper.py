@@ -304,21 +304,18 @@ def is_number(s: Any) -> bool:
 
 
 def self_html_code(string_html: str = '', is_all: bool = True) -> str:
-    # 如果is_all为True，则过滤掉全部的<>
     if string_html is None:
         return ''
     string_html = string_html if isinstance(string_html, str) else str(string_html)
     if is_all:
         return string_html.replace('<', '&lt;').replace('>', '&gt;').replace('%3C', '&lt;').replace('%3E', '&gt;')
-    # 保留安全的，默认只处理script、object和iframe
-    # 直接用转意符写的肯定有问题，直接处理掉
     string_html = string_html.replace('%3C', '&lt;').replace('%3E', '&gt;')
-    re_script_start = re.compile('<\s*script[^>]*>', re.IGNORECASE)  # Script 开始
-    re_script_end = re.compile('<\s*/\s*script\s*>', re.IGNORECASE)  # Script 结束
-    re_object_start = re.compile('<\s*object[^>]*>', re.IGNORECASE)  # object 开始
-    re_object_end = re.compile('<\s*/\s*object\s*>', re.IGNORECASE)  # object 结束
-    re_iframe_start = re.compile('<\s*iframe[^>]*>', re.IGNORECASE)  # iframe 开始
-    re_iframe_end = re.compile('<\s*/\s*iframe\s*>', re.IGNORECASE)  # iframe 结束
+    re_script_start = re.compile('<\s*script[^>]*>', re.IGNORECASE)
+    re_script_end = re.compile('<\s*/\s*script\s*>', re.IGNORECASE)
+    re_object_start = re.compile('<\s*object[^>]*>', re.IGNORECASE)
+    re_object_end = re.compile('<\s*/\s*object\s*>', re.IGNORECASE)
+    re_iframe_start = re.compile('<\s*iframe[^>]*>', re.IGNORECASE)
+    re_iframe_end = re.compile('<\s*/\s*iframe\s*>', re.IGNORECASE)
     string_html = re_script_start.sub('', string_html)  # 直接去掉
     string_html = re_script_end.sub('', string_html)
     string_html = re_object_start.sub('', string_html)
@@ -352,17 +349,24 @@ def check_email(email: str) -> bool:
     return True
 
 
-def get_args_from_dict(dt: Dict, ky: str, default: Optional[Any] = '') -> Optional[Any]:
+def get_args_from_dict(dt: Dict, ky: str, default: Optional[Any] = '', force_str: bool = False) -> Optional[Any]:
+    if default is None and force_str:
+        default = ''
     word = default if ky not in dt else dt[ky]
     if is_number(word):
+        if force_str:
+            return str(word)
         return word
     if isinstance(word, str):
         return str(word).strip()
     return word
 
 
-def get_variable_from_request(key_name: str, default: Optional[str] = '', method: str = 'check') -> Optional[Any]:
+def get_variable_from_request(key_name: str, default: Optional[str] = '', method: str = 'check',
+                              force_str: bool = False) -> Optional[Any]:
     method = 'check' if method is None or not isinstance(method, str) else str(method).strip().lower()
+    if default is None and force_str:
+        default = ''
     if method == 'check':
         word = request.form.get(key_name, None)
         if word is None:
@@ -381,6 +385,8 @@ def get_variable_from_request(key_name: str, default: Optional[str] = '', method
     if word is None:
         return default
     if is_number(word):
+        if force_str:
+            return str(word)
         return word
     return str(word).strip()
 
@@ -439,7 +445,7 @@ def get_month_range(start_year: int, start_month: int, long: int) -> Tuple[int, 
 
 
 def get_today(is_timestamp: bool = False, hours: int = 0, minutes: int = 0) -> Union[str, int]:
-    dn: str = timestamp2str(get_local_now(hours, minutes), '%Y-%m-%d', hours, minutes)
+    dn: str = timestamp2str(get_utc_now(), '%Y-%m-%d', hours, minutes)
     if not is_timestamp:
         return dn
     timestamp: int = str2timestamp(dn, '%Y-%m-%d', hours, minutes)
@@ -447,7 +453,7 @@ def get_today(is_timestamp: bool = False, hours: int = 0, minutes: int = 0) -> U
 
 
 def get_yesterday(is_timestamp: bool = False, hours: int = 0, minutes: int = 0) -> Union[str, int]:
-    _, dt = get_this_days_range(-1, hours, minutes)
+    dt, _ = get_this_days_range(-1, hours, minutes)
     if not is_timestamp:
         return timestamp2str(dt, '%Y-%m-%d', hours, minutes)
     return dt
@@ -457,7 +463,7 @@ def get_this_days_range(long: int, hours: int = 0, minutes: int = 0) -> Tuple[in
     long = 1 if not is_number(long) else int(long)
     long = 1 if long == 0 else long
     # 获取当前日期
-    dn: str = timestamp2str(get_local_now(hours, minutes), '%Y-%m-%d', hours, minutes)
+    dn: str = timestamp2str(get_utc_now(), '%Y-%m-%d', hours, minutes)
     start_time: int = str2timestamp(dn, '%Y-%m-%d', hours, minutes)
     end_time: int
     if long < 0:
@@ -545,9 +551,9 @@ def easy_encrypted(text: str, is_decode=True, key: Optional[str] = None, expiry:
             plan_key: str = current_app.config['SECRET_KEY']
         else:
             plan_key = key
-        key_c_length: int = 4  # 动态密匙长度，相同的明文会生成不同密文就是依靠动态密匙
-        key = md5(plan_key)  # 密匙
-        key_a: str = md5(key[0:16])  # 密匙a会参与加解密
+        key_c_length: int = 4
+        key = md5(plan_key)
+        key_a: str = md5(key[0:16])
         key_b: str = md5(key[16:32])
         key_c: str
         if key_c_length <= 0:
@@ -566,13 +572,12 @@ def easy_encrypted(text: str, is_decode=True, key: Optional[str] = None, expiry:
             expiry = expiry + get_utc_now() if expiry > 0 else 0
             expiry_str: str = '%010d' % expiry
             plan_text: str = expiry_str + '' + md5(text + '' + key_b)[0:16] + '' + text
-            new_data = plan_text.encode('latin-1')  # 这里必须是latin-1编码，不然会出错
+            new_data = plan_text.encode('latin-1')
         string_length: int = len(new_data)
         decode_result: str = ''
         encode_result: bytes = b''
         box: List[int] = list(range(0, 256))
         rnd_key: List[int] = []
-        # 产生密匙簿
         for i in range(256):
             start: int = i % key_length
             end: int = start + 1
@@ -583,16 +588,14 @@ def easy_encrypted(text: str, is_decode=True, key: Optional[str] = None, expiry:
             _tmp_box_: int = copy.deepcopy(box[i])
             box[i] = copy.deepcopy(box[j])
             box[j] = copy.deepcopy(_tmp_box_)
-            # 重设索引
-            a: int = 0
-            j = 0
+        a: int = 0
+        j = 0
         for i in range(string_length):
             a = (a + 1) % 256
             j = (j + box[a]) % 256
             _tmp_box_: int = copy.deepcopy(box[a])
             box[a] = copy.deepcopy(box[j])
             box[j] = copy.deepcopy(_tmp_box_)
-            # 从密匙簿得出密匙进行异或，再转成字符
             od1: int = new_data[i]
             od2: int = box[(box[a] + box[j]) % 256]
             co: int = (od1 ^ od2)
@@ -611,15 +614,18 @@ def easy_encrypted(text: str, is_decode=True, key: Optional[str] = None, expiry:
             result: str = b64code.decode('latin-1')
             result = result.replace('=', '')
             result = key_c + '' + result
-            # 由于有一定概率加密失败，因此输出之前，先反向解析下试试
             test_password: Optional[str] = easy_encrypted(result, key=plan_key, expiry=expiry, logger=logger)
             if test_password == text:
                 return result
     except Exception as e:
-        if is_decode:
-            msg = u'解密字符串:[{}]时发生异常:{}'
-        else:
-            msg = u'加密字符串:[{}]时发生异常:{}'
         if logger:
-            logger.error(msg.format(text, e))
+            logger.error(e)
     return None
+
+
+def check_chinese_mobile(mobile: str) -> bool:
+    try:
+        return re.match('^1\d{10}$', mobile) is not None
+    except Exception as e:
+        str(e)
+    return False
