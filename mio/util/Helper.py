@@ -355,7 +355,7 @@ def get_args_from_dict(dt: Dict, ky: str, default: Optional[Any] = '', force_str
     word = default if ky not in dt else dt[ky]
     if is_number(word):
         if force_str:
-            return str(word)
+            return str(word).strip()
         return word
     if isinstance(word, str):
         return str(word).strip()
@@ -386,7 +386,7 @@ def get_variable_from_request(key_name: str, default: Optional[str] = '', method
         return default
     if is_number(word):
         if force_str:
-            return str(word)
+            return str(word).strip()
         return word
     return str(word).strip()
 
