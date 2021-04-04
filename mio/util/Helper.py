@@ -448,14 +448,14 @@ def get_today(is_timestamp: bool = False, hours: int = 0, minutes: int = 0) -> U
     dn: str = timestamp2str(get_utc_now(), '%Y-%m-%d', hours, minutes)
     if not is_timestamp:
         return dn
-    timestamp: int = str2timestamp(dn, '%Y-%m-%d', hours, minutes)
+    timestamp: int = str2timestamp(dn, '%Y-%m-%d')
     return timestamp
 
 
 def get_yesterday(is_timestamp: bool = False, hours: int = 0, minutes: int = 0) -> Union[str, int]:
     dt, _ = get_this_days_range(-1, hours, minutes)
     if not is_timestamp:
-        return timestamp2str(dt, '%Y-%m-%d', hours, minutes)
+        return timestamp2str(dt, '%Y-%m-%d')
     return dt
 
 
