@@ -362,7 +362,7 @@ def get_args_from_dict(dt: Dict, ky: str, default: Optional[Any] = '', force_str
     return word
 
 
-def get_variable_from_request(key_name: str, default: Optional[str] = '', method: str = 'check',
+def get_variable_from_request(key_name: str, default: Optional[Any] = '', method: str = 'check',
                               force_str: bool = False) -> Optional[Any]:
     method = 'check' if method is None or not isinstance(method, str) else str(method).strip().lower()
     if default is None and force_str:
