@@ -538,8 +538,14 @@ def rounded(numerical: Any, decimal: int = 2) -> Decimal:
     decimal = 0 if not is_number(decimal) or decimal <= 0 else decimal
     decimal_place: str
     if not is_number(numerical):
-        decimal_place = '%.{}f'.format(decimal) % 0
-        return Decimal(decimal_place)
+        return Decimal('0')
+    if decimal <= 0:
+        i, d, *_ = str(numerical).strip().split('.')
+        nt: Decimal = Decimal(d) / pow(10, len(d))
+        if nt >= 0.5:
+            return Decimal(i) + 1
+        else:
+            return Decimal(i)
     decimal_place = '%.{}f'.format(decimal) % Decimal(str(numerical))
     return Decimal(decimal_place)
 
