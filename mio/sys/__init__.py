@@ -4,6 +4,7 @@ import sys
 import yaml
 import codecs
 import logging
+from celery import Celery
 from flask import Flask, blueprints
 from flask_bcrypt import Bcrypt
 from flask_login import LoginManager
@@ -20,20 +21,21 @@ from mio.util.Helper import in_dict, is_enable, is_number
 from mio.util.Logs import LogHandler, LoggerType
 from mio.sys.wsgi import MIO_SYSTEM_VERSION
 
-mail: Mail = Mail()
+mail: Optional[Mail] = None
 crypt: Bcrypt = Bcrypt()
-db: MongoEngine = MongoEngine()
-redis_db: FlaskRedis = FlaskRedis()
-csrf: CSRFProtect = CSRFProtect()
-login_manager: LoginManager = LoginManager()
-cache: Cache
-babel: Babel
+db: Optional[MongoEngine] = None
+redis_db: Optional[FlaskRedis] = None
+csrf: Optional[CSRFProtect] = None
+login_manager: Optional[LoginManager] = None
+cache: Optional[Cache] = None
+babel: Optional[Babel] = None
+celery_app: Optional[Celery] = None
 
 
 def create_app(config_name: str, root_path: Optional[str] = None, config_clz: Optional[str] = None,
                logger_type: LoggerType = LoggerType,
                log_level: int = logging.DEBUG) -> Tuple[Flask, List[tuple], LogHandler]:
-    global cache, babel
+    global cache, babel, login_manager, csrf, redis_db, db, mail, celery_app
     console = LogHandler('PyMio', logger_type=logger_type, log_level=log_level)
     console.info(u'Initializing the system......profile: {}'.format(config_name))
     config_clz: str = 'config' if not isinstance(config_clz, str) else config_clz.strip()
@@ -74,10 +76,12 @@ def create_app(config_name: str, root_path: Optional[str] = None, config_clz: Op
     babel = Babel(app)
     if in_dict(base_config, 'csrf'):
         if is_enable(base_config['csrf'], 'enable'):
+            csrf = CSRFProtect()
             csrf.init_app(app)
     if in_dict(base_config, 'login_manager'):
         if is_enable(base_config['login_manager'], 'enable'):
             login_manager_config: dict = base_config['login_manager']
+            login_manager = LoginManager()
             login_manager.session_protection = 'strong' if not in_dict(login_manager_config, 'session_protection') \
                 else login_manager_config['session_protection']
             login_manager.login_view = 'main.login' if not in_dict(login_manager_config, 'login_view') else \
@@ -88,10 +92,19 @@ def create_app(config_name: str, root_path: Optional[str] = None, config_clz: Op
                 login_manager.login_message_category = login_manager_config['login_message_category']
             login_manager.init_app(app)
     if is_enable(app.config, 'MIO_MAIL'):
+        mail = Mail()
         mail.init_app(app)
     if is_enable(app.config, 'MONGODB_ENABLE'):
+        db = MongoEngine()
         db.init_app(app)
+    if is_enable(app.config, 'CELERY_ENABLE'):
+        celery_app = Celery(
+            app.import_name,
+            broker=app.config['CELERY_BROKER_URL'],
+            backend=app.config['CELERY_BACKEND_URL']
+        )
     if is_enable(app.config, 'REDIS_ENABLE'):
+        redis_db = FlaskRedis()
         redis_db.init_app(app)
     if is_enable(app.config, 'CORS_ENABLE'):
         if not in_dict(app.config, 'CORS_URI'):

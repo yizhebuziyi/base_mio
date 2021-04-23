@@ -16,3 +16,4 @@ daiquiri
 fleming
 uvloop
 python-dateutil
+celery
