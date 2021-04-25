@@ -22,6 +22,8 @@ class Config:
     MAIL_PASSWORD = os.environ.get('MIO_MAIL_PASSWORD', '')
     # 是否使用MONGODB
     MONGODB_ENABLE = os.environ.get('MIO_MONGODB_ENABLE', False)
+    # 是否使用CELERY
+    CELERY_ENABLE = os.environ.get('MIO_CELERY_ENABLE', False)
     # 是否使用Redis
     REDIS_ENABLE = os.environ.get('MIO_REDIS_ENABLE', False)
     # Redis前导
@@ -54,6 +56,8 @@ class DevelopmentConfig(Config):
     REDIS_URL = 'redis://localhost:6379/0'
     CACHE_TYPE = 'simple'
     CACHE_REDIS_URL = REDIS_URL
+    CELERY_BROKER_URL = REDIS_URL
+    CELERY_BACKEND_URL = REDIS_URL
 
 
 class TestingConfig(Config):
@@ -68,6 +72,8 @@ class TestingConfig(Config):
     REDIS_URL = 'redis://localhost:6379/0'
     CACHE_TYPE = 'simple'
     CACHE_REDIS_URL = REDIS_URL
+    CELERY_BROKER_URL = REDIS_URL
+    CELERY_BACKEND_URL = REDIS_URL
 
 
 class ProductionConfig(Config):
@@ -81,6 +87,8 @@ class ProductionConfig(Config):
     REDIS_URL = 'redis://localhost:6379/0'
     CACHE_TYPE = 'simple'
     CACHE_REDIS_URL = REDIS_URL
+    CELERY_BROKER_URL = REDIS_URL
+    CELERY_BACKEND_URL = REDIS_URL
 
 
 config = {
