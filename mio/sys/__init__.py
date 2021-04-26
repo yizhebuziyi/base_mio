@@ -16,7 +16,7 @@ from flask_redis import FlaskRedis
 from flask_mail import Mail
 from flask_caching import Cache
 from tornado.ioloop import IOLoop
-from typing import Tuple, Optional, List
+from typing import Tuple, Optional, List, Union
 from mio.util.Helper import in_dict, is_enable, is_number
 from mio.util.Logs import LogHandler, LoggerType
 from mio.sys.wsgi import MIO_SYSTEM_VERSION
@@ -152,6 +152,26 @@ def init_uvloop():
     except Exception as e:
         print(e)
         IOLoop.configure('tornado.platform.asyncio.AsyncIOLoop')
+
+
+def get_logger_level(config_name: str, mio_logger_level: str) -> Tuple[int, LoggerType]:
+    config_name = config_name.replace('\"', '').replace('\'', '').lower()
+    mio_logger_level = mio_logger_level.replace('\"', '').replace('\'', '')
+    if mio_logger_level != 'default':
+        result: Union[str, int] = logging.getLevelName(mio_logger_level)
+        if not is_number(is_number):
+            log_level = logging.DEBUG
+        else:
+            log_level = result
+        log_type = LoggerType.CONSOLE_FILE if config_name == 'production' else LoggerType.CONSOLE
+    else:
+        if config_name == 'production':
+            log_level = logging.INFO
+            log_type = LoggerType.CONSOLE_FILE
+        else:
+            log_level = logging.DEBUG
+            log_type = LoggerType.CONSOLE
+    return log_level, log_type
 
 
 def get_cpu_limit() -> int:
