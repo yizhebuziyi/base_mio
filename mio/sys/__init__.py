@@ -18,7 +18,7 @@ from flask_caching import Cache
 from tornado.ioloop import IOLoop
 from typing import Tuple, Optional, List, Union
 from mio.util.Helper import in_dict, is_enable, is_number
-from mio.util.Logs import LogHandler, LoggerType
+from mio.util.Logs import LogHandler, LoggerType, nameToLevel
 from mio.sys.wsgi import MIO_SYSTEM_VERSION
 
 mail: Optional[Mail] = None
@@ -150,28 +150,30 @@ def init_uvloop():
         import asyncio
         asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
     except Exception as e:
-        print(e)
+        str(e)
         IOLoop.configure('tornado.platform.asyncio.AsyncIOLoop')
 
 
-def get_logger_level(config_name: str, mio_logger_level: str) -> Tuple[int, LoggerType]:
+def get_logger_level(config_name: str) -> Tuple[int, LoggerType, bool]:
     config_name = config_name.replace('\"', '').replace('\'', '').lower()
-    mio_logger_level = mio_logger_level.replace('\"', '').replace('\'', '')
-    if mio_logger_level != 'default':
-        result: Union[str, int] = logging.getLevelName(mio_logger_level)
-        if not is_number(is_number):
-            log_level = logging.DEBUG
-        else:
-            log_level = result
+    is_debug = False if config_name == 'production' else True
+    mio_logger_level: str = os.environ.get('MIO_LOGGER_LEVEL') or ''
+    mio_logger_type: str = os.environ.get('MIO_LOGGER_TYPE') or ''
+    log_level: Union[str, int] = logging.getLevelName(mio_logger_level)
+    log_type: Optional[LoggerType] = nameToLevel.get(mio_logger_type)
+    if not is_number(log_level):
+        log_level = logging.INFO if config_name == 'production' else logging.DEBUG
+    if log_type is None:
         log_type = LoggerType.CONSOLE_FILE if config_name == 'production' else LoggerType.CONSOLE
-    else:
-        if config_name == 'production':
-            log_level = logging.INFO
-            log_type = LoggerType.CONSOLE_FILE
-        else:
-            log_level = logging.DEBUG
-            log_type = LoggerType.CONSOLE
-    return log_level, log_type
+    return log_level, log_type, is_debug
+
+
+def get_buffer_size() -> Tuple[Optional[int], Optional[int]]:
+    max_buffer_size: Optional[Union[str, int]] = os.environ.get('MAX_BUFFER_SIZE') or ''
+    max_body_size: Optional[Union[str, int]] = os.environ.get('MAX_BODY_SIZE') or ''
+    max_buffer_size = None if not is_number(max_buffer_size) else int(max_buffer_size)
+    max_body_size = None if not is_number(max_body_size) else int(max_body_size)
+    return max_buffer_size, max_body_size
 
 
 def get_cpu_limit() -> int:

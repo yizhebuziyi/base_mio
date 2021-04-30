@@ -20,6 +20,17 @@ class LoggerType(Enum):
     CONSOLE_SYSLOG = 14
 
 
+nameToLevel = {
+    'CONSOLE': LoggerType.CONSOLE,
+    'FILE': LoggerType.FILE,
+    'DATADOG': LoggerType.DATADOG,
+    'SYSLOG': LoggerType.SYSLOG,
+    'CONSOLE_FILE': LoggerType.CONSOLE_FILE,
+    'CONSOLE_DATADOG': LoggerType.CONSOLE_DATADOG,
+    'CONSOLE_SYSLOG': LoggerType.CONSOLE_SYSLOG,
+}
+
+
 class LogHandler(object):
     logger: daiquiri.KeywordArgumentAdapter
 

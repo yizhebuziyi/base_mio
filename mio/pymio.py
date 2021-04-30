@@ -9,7 +9,7 @@ root_path: str = os.path.abspath(os.path.dirname(__file__) + '/../')
 sys.path.append(root_path)
 from tornado.httpserver import HTTPServer
 from tornado.web import Application, FallbackHandler
-from mio.sys import create_app, init_timezone, init_uvloop, get_cpu_limit, get_logger_level
+from mio.sys import create_app, init_timezone, init_uvloop, get_cpu_limit, get_logger_level, get_buffer_size
 from mio.sys.wsgi import WSGIContainerWithThread
 from config import MIO_HOST, MIO_PORT
 
@@ -20,7 +20,6 @@ index = -1
 MIO_CONFIG: str = os.environ.get('MIO_CONFIG') or 'default'
 MIO_APP_CONFIG: str = os.environ.get('MIO_APP_CONFIG') or 'config'
 MIO_LIMIT_CPU: int = get_cpu_limit()
-MIO_LOGGER_LEVEL: str = os.environ.get('MIO_LOGGER_LEVEL') or 'default'
 for arg in sys.argv:
     index += 1
     if index <= 0:
@@ -48,14 +47,15 @@ for arg in sys.argv:
     if temp[0].lower() == 'config':
         MIO_CONFIG = temp[1]
         continue
-log_level, log_type = get_logger_level(MIO_CONFIG, MIO_LOGGER_LEVEL)
+log_level, log_type, is_debug = get_logger_level(MIO_CONFIG)
+max_buffer_size, max_body_size = get_buffer_size()
 app, wss, console_log = create_app(MIO_CONFIG, root_path, MIO_APP_CONFIG, log_level=log_level, logger_type=log_type)
 wss.append((r'.*', FallbackHandler, dict(fallback=WSGIContainerWithThread(app))))
-mWSGI: Application = Application(wss)
+mWSGI: Application = Application(wss, debug=is_debug, autoreload=False)
 
 if __name__ == '__main__':
     try:
-        server = HTTPServer(mWSGI)
+        server = HTTPServer(mWSGI, max_buffer_size=max_buffer_size, max_body_size=max_body_size)
         server.bind(MIO_PORT, MIO_HOST)
         console_log.info("WebServer listen in {}://{}:{}".format('http', MIO_HOST, MIO_PORT))
         if MIO_LIMIT_CPU <= 0:

@@ -111,8 +111,8 @@ def str2timestamp(date: str, iso_format: str = '%Y-%m-%d %H:%M:%S', hours: int =
     try:
         time_array = time.strptime(date, iso_format)
         timestamp = time.mktime(time_array)
-        utc_time = datetime.fromtimestamp(timestamp)
-        local_dt = utc_time + timedelta(hours=hours, minutes=minutes)
+        local_time = datetime.fromtimestamp(timestamp)
+        local_dt = local_time + timedelta(hours=hours, minutes=minutes)
         timestamp = time.mktime(local_dt.timetuple())
         ts = int(timestamp)
     except Exception as e:
