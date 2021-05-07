@@ -635,3 +635,9 @@ def check_chinese_mobile(mobile: str) -> bool:
     except Exception as e:
         str(e)
     return False
+
+
+def str2int(text: str, default: Optional[int] = 0) -> Optional[int]:
+    if not is_number(text):
+        return default
+    return int(Decimal(text))
