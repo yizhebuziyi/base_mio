@@ -1,18 +1,20 @@
 # -*- coding: utf-8 -*-
 import sys
-from flask_script import Manager
+import click
 from celery.__main__ import main
+from flask.cli import AppGroup
 from typing import List
 
-CeleryCommand: Manager = Manager(usage=u'Execute Celery Worker.')
+CeleryCommand: AppGroup = AppGroup('celery', help='celery helper')
 
 
-@CeleryCommand.option('-A', '--app', dest='clazz', default=None,
-                      help=u'APPLICATION.')
-@CeleryCommand.option('-w', '--worker', dest='worker', default=None,
-                      help=u'Celery worker args.')
-@CeleryCommand.option('-ctl', '--control', dest='control', default=None,
-                      help=u'Workers remote control args.')
+@CeleryCommand.command('run')
+@click.option('-A', '--app', 'clazz', default=None,
+              help=u'APPLICATION.')
+@click.option('-w', '--worker', 'worker', default=None,
+              help=u'Celery worker args.')
+@click.option('-ctl', '--control', 'control', default=None,
+              help=u'Workers remote control args.')
 def run(clazz=None, worker=None, control=None):
     if clazz is None:
         print(u'App must be set.')

@@ -1,16 +1,18 @@
 # -*- encoding: utf-8 -*-
+import click
 from flask import current_app
-from flask_script import Manager
+from flask.cli import AppGroup
 from typing import List
 
-CliCommand: Manager = Manager(usage=u'Execute Command line.')
+CliCommand: AppGroup = AppGroup('cli', help='Execute app in cli')
 
 
-@CliCommand.option('-cls', '--clazz', dest='clazz', default=None,
-                   help=u'Class name. like: cli.Hello.World.me, file in cli folder and name is Hello.py.')
-@CliCommand.option('-arg', '--args', dest='args', default=None,
-                   help=u'Arguments. using k=v. If you have multiple parameters, you need to use "||".'
-                        u' like: "k1=v1||k2=v2..."')
+@CliCommand.command('exe')
+@click.option('-cls', '--clazz', 'clazz', default=None,
+              help=u'Class name. like: cli.Hello.World.me, file in cli folder and name is Hello.py.')
+@click.option('-arg', '--args', 'args', default=None,
+              help=u'Arguments. using k=v. If you have multiple parameters, you need to use "||".'
+                   u' like: "k1=v1||k2=v2..."')
 def exe(clazz=None, args=None):
     if clazz is None:
         print(u'Execute cli function, like: shell.py cli exe -cls=cli.Hello.World.me')
