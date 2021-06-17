@@ -542,7 +542,12 @@ def rounded(numerical: Any, decimal: int = 2) -> Decimal:
     if not is_number(numerical):
         return Decimal('0')
     if decimal <= 0:
-        i, d, *_ = str(numerical).strip().split('.')
+        temp = str(numerical).strip().split('.')
+        if len(temp) > 1:
+            d, i, *_ = temp
+        else:
+            d = temp[0]
+            i = 0
         nt: Decimal = Decimal(d) / pow(10, len(d))
         if nt >= 0.5:
             return Decimal(i) + 1
