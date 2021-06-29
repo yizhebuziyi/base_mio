@@ -538,7 +538,6 @@ def base64_txt_decode(crypto: str) -> str:
 
 def rounded(numerical: Any, decimal: int = 2) -> Decimal:
     decimal = 0 if not is_number(decimal) or decimal <= 0 else decimal
-    decimal_place: str
     if not is_number(numerical):
         return Decimal('0')
     if decimal <= 0:
@@ -553,8 +552,9 @@ def rounded(numerical: Any, decimal: int = 2) -> Decimal:
             return Decimal(i) + 1
         else:
             return Decimal(i)
-    decimal_place = '%.{}f'.format(decimal) % Decimal(str(numerical))
-    return Decimal(decimal_place)
+    zero: str = '0' * (decimal - 1)
+    decimal_place: Decimal = Decimal(str(numerical)).quantize(Decimal(f'0.{zero}1'), rounding='ROUND_HALF_UP')
+    return decimal_place
 
 
 def easy_encrypted(text: str, is_decode=True, key: Optional[str] = None, expiry: int = 0,
