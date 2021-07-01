@@ -538,22 +538,15 @@ def base64_txt_decode(crypto: str) -> str:
 
 def rounded(numerical: Any, decimal: int = 2) -> Decimal:
     decimal = 0 if not is_number(decimal) or decimal <= 0 else decimal
+    decimal_place: Decimal
     if not is_number(numerical):
         return Decimal('0')
+    numerical_str: str = str(numerical)
     if decimal <= 0:
-        temp = str(numerical).strip().split('.')
-        if len(temp) > 1:
-            d, i, *_ = temp
-        else:
-            d = temp[0]
-            i = 0
-        nt: Decimal = Decimal(d) / pow(10, len(d))
-        if nt >= 0.5:
-            return Decimal(i) + 1
-        else:
-            return Decimal(i)
-    zero: str = '0' * (decimal - 1)
-    decimal_place: Decimal = Decimal(str(numerical)).quantize(Decimal(f'0.{zero}1'), rounding='ROUND_HALF_UP')
+        decimal_place = Decimal(numerical_str).quantize(Decimal('1'), rounding='ROUND_HALF_UP')
+    else:
+        zero: str = '0' * (decimal - 1)
+        decimal_place = Decimal(numerical_str).quantize(Decimal(f'0.{zero}1'), rounding='ROUND_HALF_UP')
     return decimal_place
 
 
