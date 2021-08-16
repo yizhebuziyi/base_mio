@@ -2,6 +2,7 @@
 import os
 import sys
 import yaml
+import time
 import codecs
 import logging
 from celery import Celery
@@ -135,10 +136,20 @@ def create_app(config_name: str, root_path: Optional[str] = None, config_clz: Op
     return app, wss, console
 
 
+def get_timezone_config() -> str:
+    try:
+        from config import Config
+        tz: str = getattr(Config, 'MIO_TIMEZONE')
+        return tz
+    except Exception as e:
+        str(e)
+        return 'Asia/Shanghai'
+
+
 def init_timezone():
     try:
-        import time
-        os.environ['TZ'] = os.environ.get('MIO_TIMEZONE') or 'Asia/Shanghai'
+        tz: str = get_timezone_config()
+        os.environ['TZ'] = tz
         time.tzset()
     except Exception as e:
         str(e)
