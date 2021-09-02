@@ -65,4 +65,5 @@ if __name__ == '__main__':
             server.start(MIO_LIMIT_CPU)
         asyncio.get_event_loop().run_forever()
     except KeyboardInterrupt:
+        asyncio.get_event_loop().stop()
         console_log.info("WebServer Closed.")
