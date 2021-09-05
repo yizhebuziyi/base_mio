@@ -13,6 +13,7 @@ from tornado.web import Application, FallbackHandler
 from typing import Optional
 from mio.sys import create_app, init_timezone, init_uvloop, get_cpu_limit, get_logger_level, get_buffer_size
 from mio.sys.wsgi import WSGIContainerWithThread
+from mio.util.Helper import write_txt_file
 from config import MIO_HOST, MIO_PORT
 
 init_timezone()
@@ -22,6 +23,7 @@ index = -1
 MIO_CONFIG: str = os.environ.get('MIO_CONFIG') or 'default'
 MIO_APP_CONFIG: str = os.environ.get('MIO_APP_CONFIG') or 'config'
 MIO_LIMIT_CPU: int = get_cpu_limit()
+pid_file_path: str = os.path.join(root_path, 'pymio.pid')
 domain_socket: Optional[str] = None
 for arg in sys.argv:
     index += 1
@@ -50,6 +52,9 @@ for arg in sys.argv:
     if temp[0].lower() == 'config':
         MIO_CONFIG = temp[1]
         continue
+    if temp[0].lower() == 'pid':
+        pid_file_path = temp[1]
+        continue
     if temp[0].lower() == 'ds':
         domain_socket = temp[1]
         continue
@@ -76,4 +81,5 @@ if __name__ == '__main__':
             server.start(MIO_LIMIT_CPU)
         asyncio.get_event_loop().run_forever()
     except KeyboardInterrupt:
+        asyncio.get_event_loop().stop()
         console_log.info("WebServer Closed.")
