@@ -58,6 +58,7 @@ for arg in sys.argv:
     if temp[0].lower() == 'ds':
         domain_socket = temp[1]
         continue
+write_txt_file(pid_file_path, str(os.getpid()))
 log_level, log_type, is_debug = get_logger_level(MIO_CONFIG)
 max_buffer_size, max_body_size = get_buffer_size()
 app, wss, console_log = create_app(MIO_CONFIG, root_path, MIO_APP_CONFIG, log_level=log_level, logger_type=log_type)
