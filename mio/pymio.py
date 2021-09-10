@@ -70,7 +70,7 @@ if __name__ == '__main__':
     try:
         server = HTTPServer(mWSGI, max_buffer_size=max_buffer_size, max_body_size=max_body_size)
         if domain_socket is not None:
-            socket = bind_unix_socket(domain_socket)
+            socket = bind_unix_socket(domain_socket, mode=0o777)
             server.add_socket(socket)
             console_log.info(f'WebServer listen in {domain_socket}')
         else:
