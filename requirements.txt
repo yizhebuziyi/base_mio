@@ -16,3 +16,4 @@ uvloop
 python-dateutil
 celery
 asgiref
+zstandard

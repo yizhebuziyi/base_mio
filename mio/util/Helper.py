@@ -303,7 +303,7 @@ def is_number(s: Any) -> bool:
     return False
 
 
-def self_html_code(string_html: str = '', is_all: bool = True) -> str:
+def safe_html_code(string_html: str = '', is_all: bool = True) -> str:
     if string_html is None:
         return ''
     string_html = string_html if isinstance(string_html, str) else str(string_html)
