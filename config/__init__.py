@@ -37,6 +37,8 @@ class Config:
     LANGUAGES = ['zh-CN']
     # 默认语言
     DEFAULT_LANGUAGE = 'zh-CN'
+    # 默认时区
+    MIO_TIMEZONE = 'Asia/Shanghai'
 
     @staticmethod
     def init_app(app):
